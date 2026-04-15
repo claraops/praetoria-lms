@@ -1,4 +1,4 @@
-package cloud.praetoria.lms.security;
+package cloud.praetoria.lms.exceptions;
 
 import java.io.IOException;
 

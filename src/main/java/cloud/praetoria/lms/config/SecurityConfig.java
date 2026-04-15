@@ -2,7 +2,6 @@ package cloud.praetoria.lms.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
@@ -19,8 +18,8 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import cloud.praetoria.lms.exceptions.JwtAuthenticationEntryPoint;
 import cloud.praetoria.lms.security.JwtAccessDeniedHandler;
-import cloud.praetoria.lms.security.JwtAuthenticationEntryPoint;
 import cloud.praetoria.lms.security.JwtAuthenticationFilter;
 import cloud.praetoria.lms.security.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
@@ -37,7 +36,7 @@ public class SecurityConfig {
     private final JwtTokenProvider tokenProvider;
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
     private final JwtAccessDeniedHandler jwtAccessDeniedHandler;
-    
+   
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
@@ -45,6 +44,7 @@ public class SecurityConfig {
     
     @Bean
     public DaoAuthenticationProvider authenticationProvider() {
+        
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider(userDetailsService);
         authProvider.setPasswordEncoder(passwordEncoder());
         return authProvider;
@@ -93,6 +93,7 @@ public class SecurityConfig {
                 .requestMatchers("/auth/refresh-token").permitAll()
                 .requestMatchers("/auth/request-password-reset").permitAll()
                 .requestMatchers("/auth/reset-password").permitAll()
+                .requestMatchers("/auth/logout").authenticated()
                 
                 // Swagger
                 .requestMatchers("/swagger-ui/**").permitAll()
@@ -102,15 +103,15 @@ public class SecurityConfig {
                 // H2 Console
                 .requestMatchers("/h2-console/**").permitAll()
                 
-                // Admin
-                .requestMatchers("/admin/**").hasRole("ADMIN")
-                
-                // Modules et leçons
-                .requestMatchers("/modules/**").hasAnyRole("STUDENT", "TEACHER", "ADMIN")
-                .requestMatchers("/lessons/**").hasAnyRole("STUDENT", "TEACHER", "ADMIN")
-                
-                // Users
-                .requestMatchers("/users/**").authenticated()
+                // Routes API
+                .requestMatchers("/api/blocks/**").hasAnyRole("STUDENT", "TEACHER", "ADMIN")
+                .requestMatchers("/api/courses/**").hasAnyRole("STUDENT", "TEACHER", "ADMIN")
+                .requestMatchers("/api/exercises/**").hasAnyRole("STUDENT", "TEACHER", "ADMIN")
+                .requestMatchers("/api/modules/**").hasAnyRole("STUDENT", "TEACHER", "ADMIN")
+                .requestMatchers("/api/profile/**").authenticated()
+                .requestMatchers("/api/promos/**").hasAnyRole("TEACHER", "ADMIN")
+                .requestMatchers("/api/quizzes/**").hasAnyRole("STUDENT", "TEACHER", "ADMIN")
+                .requestMatchers("/api/users/**").hasAnyRole("TEACHER", "ADMIN")
                 
                 .anyRequest().authenticated()
             )
@@ -123,5 +124,4 @@ public class SecurityConfig {
         
         return http.build();
     }
-    
 }

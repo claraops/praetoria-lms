@@ -5,6 +5,9 @@ import java.util.List;
 
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,13 +37,25 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class AuthService {
     
-    private final UserRepository userRepository;
-    private final RoleRepository roleRepository;
-    private final OrganizationRepository organizationRepository;
-    private final RefreshTokenRepository refreshTokenRepository;
-    private final PasswordEncoder passwordEncoder;
-    private final AuthenticationManager authenticationManager;
-    private final JwtTokenProvider jwtTokenProvider;
+	 private final UserRepository userRepository;
+	    private final RoleRepository roleRepository;
+	    private final OrganizationRepository organizationRepository;
+	    private final RefreshTokenRepository refreshTokenRepository;
+	    private final PasswordEncoder passwordEncoder;
+	    private final AuthenticationManager authenticationManager;
+	    private final JwtTokenProvider jwtTokenProvider;
+	    
+	    // ✅ NOUVELLE MÉTHODE : Récupérer l'utilisateur courant
+	    public User getCurrentUser() {
+	        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+	        if (authentication == null || !authentication.isAuthenticated()) {
+	            throw new AuthenticationException("Utilisateur non authentifié");
+	        }
+
+	        String email = ((UserDetails) authentication.getPrincipal()).getUsername();
+	        return userRepository.findByEmail(email)
+	                .orElseThrow(() -> new ResourceNotFoundException("Utilisateur non trouvé"));
+	    }
     
     /**
      * Enregistrer un nouvel étudiant via clé d'inscription
