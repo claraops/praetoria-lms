@@ -26,11 +26,24 @@ public class AuthController {
     private final PasswordResetService passwordResetService;
     private final UserRepository userRepository;
 
+    /**
+     * Inscrit un nouvel utilisateur.
+     *
+     * @param request les données d'inscription validées
+     * @return les tokens et les informations de l'utilisateur (201 Created)
+     */
     @PostMapping("/register")
     public ResponseEntity<ApiResponse<Void>> register(@Valid @RequestBody RegisterRequest request) {
         authService.registerUser(request);
         return ResponseEntity.ok(ApiResponse.success(null, "Inscription réussie. Vous pouvez vous connecter !"));
     }
+    
+    /**
+     * Connecte un utilisateur existant.
+     *
+     * @param request les identifiants de connexion valides
+     * @return les tokens et les informations de l'utilisateur
+     */
 
     @PostMapping("/login")
     public ResponseEntity<ApiResponse<LoginResponse>> login(@Valid @RequestBody LoginRequest request) {
