@@ -18,4 +18,4 @@ public class BlockRequest {
     private String description;
 
     private String cover;
-}
+}                  // a depalcer

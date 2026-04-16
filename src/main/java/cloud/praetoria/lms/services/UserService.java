@@ -2,7 +2,7 @@ package cloud.praetoria.lms.services;
 
 import cloud.praetoria.lms.dtos.AssignBlocksRequest;
 import cloud.praetoria.lms.dtos.RoleUpdateRequest;
-import cloud.praetoria.lms.dtos.UserResponse;  // ← Utiliser UserResponse
+import cloud.praetoria.lms.dtos.UserResponse; 
 import cloud.praetoria.lms.dtos.UserUpdateRequest;
 import java.util.List;
 

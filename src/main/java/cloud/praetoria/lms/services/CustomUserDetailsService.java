@@ -43,4 +43,4 @@ public class CustomUserDetailsService implements UserDetailsService {
         log.debug("Utilisateur trouvé : {} avec le rôle : {}", user.getEmail(), user.getRole().name());
         return UserDetailsImpl.build(user);
     }
-}*/
+}  **/

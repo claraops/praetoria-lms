@@ -57,7 +57,13 @@ public class AuthController {
         LoginResponse response = authService.refreshAccessToken(request);
         return ResponseEntity.ok(ApiResponse.success(response, "Token rafraîchi avec succès"));
     }
-
+    
+    /**
+     * Déconnecte l'utilisateur en révoquant ses refresh tokens.
+     *
+     * @param request le refresh token à révoquer
+     * @return un message de confirmation
+     */
     @PostMapping("/logout")
     public ResponseEntity<ApiResponse<Void>> logout() {
         User currentUser = authService.getCurrentUser();  
@@ -65,6 +71,9 @@ public class AuthController {
         return ResponseEntity.ok(ApiResponse.success(null, "Déconnexion réussie."));
     }
 
+    /***
+     * 
+     * */
     @PostMapping("/request-password-reset")
     public ResponseEntity<ApiResponse<Void>> requestPasswordReset(@Valid @RequestBody RequestPasswordResetRequest request) {
         try {

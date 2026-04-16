@@ -51,6 +51,10 @@ public class UserCourseProgress {
     @JoinColumn(name = "course_id", nullable = false)
     private Course course;
     
+    @ManyToOne
+    @JoinColumn(name = "module_id")
+    private Module module;
+    
     @Column(name = "completed", nullable = false)
     @Builder.Default
     private Boolean completed = false;
