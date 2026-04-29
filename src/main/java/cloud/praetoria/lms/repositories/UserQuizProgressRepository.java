@@ -18,60 +18,35 @@ import cloud.praetoria.lms.entities.UserQuizProgress;
 
 @Repository
 public interface UserQuizProgressRepository extends JpaRepository<UserQuizProgress, Long> {
-    
-    /**
-     * Trouver la progression d'un utilisateur pour un quiz spécifique
-     */
+
+    // Recherches de base
     Optional<UserQuizProgress> findByUserAndQuiz(User user, Quiz quiz);
-    
-    /**
-     * Trouver toutes les progressions d'un utilisateur
-     */
     List<UserQuizProgress> findByUser(User user);
-    
-    /**
-     * Compter le nombre de quiz terminés par un utilisateur
-     */
+
+    // Comptages
     long countByUserAndCompletedTrue(User user);
     
-    /**
-     * Vérifier si un utilisateur a terminé un quiz spécifique
-     */
-    boolean existsByUserAndQuizAndCompletedTrue(User user, Quiz quiz);
-    
-    /**
-     * Trouver tous les quiz démarrés par un utilisateur
-     */
+    // Progression par utilisateur
     List<UserQuizProgress> findByUserAndStartedAtIsNotNull(User user);
-    
-    /**
-     * Trouver tous les quiz terminés par un utilisateur avec pagination
-     */
     Page<UserQuizProgress> findByUserAndCompletedTrue(User user, Pageable pageable);
-    
-    /**
-     * Compter le nombre de quiz démarrés par un utilisateur
-     */
+
+    // Compteurs supplémentaires
     @Query("SELECT COUNT(uqp) FROM UserQuizProgress uqp WHERE uqp.user = :user AND uqp.startedAt IS NOT NULL")
     long countStartedQuizzesByUser(@Param("user") User user);
-    
-    /**
-     * Compter le nombre de quiz terminés par un utilisateur avec un score minimum
-     */
+
+    // Vérification existence
+    boolean existsByUserAndQuizAndCompletedTrue(User user, Quiz quiz);
+
+    // Score minimum (pour certification par exemple)
     @Query("SELECT COUNT(uqp) FROM UserQuizProgress uqp WHERE uqp.user = :user AND uqp.completed = true AND uqp.score >= :minScore")
     long countCompletedQuizzesByUserWithMinScore(@Param("user") User user, @Param("minScore") int minScore);
-    
-    /**
-     * Supprimer toutes les progressions d'un utilisateur
-     */
+
+    // Suppressions
     @Modifying
     @Transactional
     @Query("DELETE FROM UserQuizProgress uqp WHERE uqp.user = :user")
     void deleteByUser(@Param("user") User user);
-    
-    /**
-     * Supprimer toutes les progressions pour un quiz
-     */
+
     @Modifying
     @Transactional
     @Query("DELETE FROM UserQuizProgress uqp WHERE uqp.quiz = :quiz")

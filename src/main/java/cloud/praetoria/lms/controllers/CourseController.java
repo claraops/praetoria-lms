@@ -25,15 +25,53 @@ import java.util.List;
 @Tag(name = "Cours", description = "Endpoints pour la gestion des cours")
 public class CourseController {
 
+
     private final CourseService courseService;
 
-    @GetMapping
+    /*@GetMapping
     @Operation(summary = "Lister tous les cours")
-    public ResponseEntity<ApiResponse<List<CourseResponse>>> getAllCourses(@AuthenticationPrincipal UserDetailsImpl userDetails) {
+    public ResponseEntity<ApiResponse<List<CourseResponse>>> getAllCourses(
+            @AuthenticationPrincipal UserDetailsImpl userDetails  ) {
+        
+        if (userDetails == null) {
+            log.error("❌ userDetails est null");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(ApiResponse.error("Utilisateur non authentifié"));
+        }
+        
+        log.debug("✅ Récupération des cours pour: {}", userDetails.getEmail());
         List<CourseResponse> courses = courseService.getAllCourses(userDetails.getId());
         return ResponseEntity.ok(ApiResponse.success(courses));
     }
+    */
+    
+    
+ // FICHIER : CourseController.java
+    @GetMapping
+    @Operation(summary = "Lister tous les cours")
+    public ResponseEntity<ApiResponse<List<CourseResponse>>> getAllCourses(
+            @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        
+        // Sécurité supplémentaire si @AuthenticationPrincipal est null
+        if (userDetails == null) {
+            var auth = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+            if (auth != null && auth.getPrincipal() instanceof UserDetailsImpl) {
+                userDetails = (UserDetailsImpl) auth.getPrincipal();
+            }
+        }
 
+        if (userDetails == null) {
+            log.error("❌ userDetails est toujours null après vérification manuelle");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(ApiResponse.error("Utilisateur non authentifié"));
+        }
+        
+        log.debug("✅ Récupération des cours pour: {}", userDetails.getEmail());
+        List<CourseResponse> courses = courseService.getAllCourses(userDetails.getId());
+        return ResponseEntity.ok(ApiResponse.success(courses));
+    }
+ 
+    	
     @GetMapping("/{id}")
     @Operation(summary = "Récupérer un cours par son identifiant")
     public ResponseEntity<ApiResponse<CourseResponse>> getCourseById(
@@ -76,12 +114,5 @@ public class CourseController {
         return ResponseEntity.ok(ApiResponse.successVoid("Cours supprimé avec succès"));
     }
 
-    @PatchMapping("/{id}/completed")
-    @Operation(summary = "Marquer un cours comme complété ou non complété")
-    public ResponseEntity<ApiResponse<CourseResponse>> toggleCompleted(
-            @PathVariable Long id,
-            @AuthenticationPrincipal UserDetailsImpl userDetails) {
-        CourseResponse courseResponse = courseService.toggleCompleted(id, userDetails.getId());
-        return ResponseEntity.ok(ApiResponse.success(courseResponse, "État du cours mis à jour"));
-    }
+   
 }

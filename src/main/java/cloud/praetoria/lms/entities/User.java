@@ -116,6 +116,14 @@ public class User {
     @Column(name = "account_locked_until")
     private LocalDateTime accountLockedUntil;
     
+    @Column(name = "xp", nullable = false)
+    @Builder.Default
+    private Integer xp = 0;
+
+    public void addXp(int xpToAdd) {
+        this.xp += xpToAdd;
+    }
+    
     @CreatedDate
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;

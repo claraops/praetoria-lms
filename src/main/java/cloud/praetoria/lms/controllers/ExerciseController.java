@@ -29,8 +29,18 @@ public class ExerciseController {
 
     @GetMapping
     @Operation(summary = "Lister tous les exercices")
-    public ResponseEntity<ApiResponse<List<ExerciseResponse>>> getAllExercises(@AuthenticationPrincipal UserDetailsImpl userDetails) {
-        List<ExerciseResponse> exercises = exerciseService.getAllExercises(userDetails.getId());
+    public ResponseEntity<ApiResponse<List<ExerciseResponse>>> getAllExercises(
+    		@AuthenticationPrincipal UserDetailsImpl userDetails) {
+    	
+    	 // Vérification de sécurité (sans commentaire bloquant)
+        if (userDetails == null) {
+            log.error("userDetails est null - Vérifiez la configuration Spring Security");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(ApiResponse.error("Utilisateur non authentifié"));
+        }
+        
+        log.debug("✅ Récupération des cours pour: {}", userDetails.getEmail());
+    	List<ExerciseResponse> exercises = exerciseService.getAllExercises(userDetails.getId());
         return ResponseEntity.ok(ApiResponse.success(exercises));
     }
 
@@ -76,12 +86,5 @@ public class ExerciseController {
         return ResponseEntity.ok(ApiResponse.successVoid("Exercice supprimé avec succès"));
     }
 
-    @PatchMapping("/{id}/completed")
-    @Operation(summary = "Marquer un exercice comme complété ou non complété")
-    public ResponseEntity<ApiResponse<ExerciseResponse>> toggleCompleted(
-            @PathVariable Long id,
-            @AuthenticationPrincipal UserDetailsImpl userDetails) {
-        ExerciseResponse exerciseResponse = exerciseService.toggleCompleted(id, userDetails.getId());
-        return ResponseEntity.ok(ApiResponse.success(exerciseResponse, "État de l'exercice mis à jour"));
-    }
+   
 }

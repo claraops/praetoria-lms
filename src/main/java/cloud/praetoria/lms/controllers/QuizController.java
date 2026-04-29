@@ -30,7 +30,16 @@ public class QuizController {
     @GetMapping
     @Operation(summary = "Lister tous les quiz")
     public ResponseEntity<ApiResponse<List<QuizResponse>>> getAllQuizzes(@AuthenticationPrincipal UserDetailsImpl userDetails) {
-        List<QuizResponse> quizzes = quizService.getAllQuizzes(userDetails.getId());
+    	 // ✅ Vérification de sécurité (sans commentaire bloquant)
+        if (userDetails == null) {
+            log.error("❌ userDetails est null - Vérifiez la configuration Spring Security");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(ApiResponse.error("Utilisateur non authentifié"));
+        }
+        
+        log.debug("✅ Récupération des cours pour: {}", userDetails.getEmail());
+    	
+    	List<QuizResponse> quizzes = quizService.getAllQuizzes(userDetails.getId());
         return ResponseEntity.ok(ApiResponse.success(quizzes));
     }
 

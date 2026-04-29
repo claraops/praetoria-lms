@@ -23,30 +23,23 @@ public class CustomUserDetailsService implements UserDetailsService {
         log.debug("Chargement de l'utilisateur: {}", email);
         
         User user = userRepository.findByEmail(email)
-            .orElseThrow(() -> {
-                log.warn("Utilisateur non trouvé: {}", email);
-                return new UsernameNotFoundException("Utilisateur non trouvé avec l'email: " + email);
-            });
+            .orElseThrow(() -> new UsernameNotFoundException("Utilisateur non trouvé: " + email));
         
         if (!user.getIsActive()) {
-            log.warn("Utilisateur inactif: {}", email);
             throw new UsernameNotFoundException("Cet utilisateur est inactif");
         }
         
         if (!user.isAccountNonLocked()) {
-            log.warn("Compte verrouillé: {}", email);
             throw new UsernameNotFoundException("Compte temporairement verrouillé");
         }
         
-        return org.springframework.security.core.userdetails.User.builder()
-            .username(user.getEmail())
-            .password(user.getPassword())
-            .authorities(new SimpleGrantedAuthority(user.getRole().getRoleName().toString()))
-            .accountExpired(false)          
-            .accountLocked(false)           
-            .credentialsExpired(false)      
-            .disabled(false)              
-            .build();
+       
+        // C'est ce qui permet à @AuthenticationPrincipal UserDetailsImpl de fonctionner
+        return UserDetailsImpl.build(user);
     }
+    
+
+    
+    
     
 }
