@@ -28,31 +28,12 @@ public class CourseController {
 
     private final CourseService courseService;
 
-    /*@GetMapping
-    @Operation(summary = "Lister tous les cours")
-    public ResponseEntity<ApiResponse<List<CourseResponse>>> getAllCourses(
-            @AuthenticationPrincipal UserDetailsImpl userDetails  ) {
-        
-        if (userDetails == null) {
-            log.error("❌ userDetails est null");
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(ApiResponse.error("Utilisateur non authentifié"));
-        }
-        
-        log.debug("✅ Récupération des cours pour: {}", userDetails.getEmail());
-        List<CourseResponse> courses = courseService.getAllCourses(userDetails.getId());
-        return ResponseEntity.ok(ApiResponse.success(courses));
-    }
-    */
     
-    
- // FICHIER : CourseController.java
     @GetMapping
     @Operation(summary = "Lister tous les cours")
     public ResponseEntity<ApiResponse<List<CourseResponse>>> getAllCourses(
             @AuthenticationPrincipal UserDetailsImpl userDetails) {
-        
-        // Sécurité supplémentaire si @AuthenticationPrincipal est null
+
         if (userDetails == null) {
             var auth = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
             if (auth != null && auth.getPrincipal() instanceof UserDetailsImpl) {
@@ -61,7 +42,7 @@ public class CourseController {
         }
 
         if (userDetails == null) {
-            log.error("❌ userDetails est toujours null après vérification manuelle");
+            log.error(" userDetails est toujours null après vérification manuelle");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(ApiResponse.error("Utilisateur non authentifié"));
         }

@@ -31,10 +31,7 @@ public class CustomUserDetailsService implements UserDetailsService {
         
         if (!user.isAccountNonLocked()) {
             throw new UsernameNotFoundException("Compte temporairement verrouillé");
-        }
-        
-       
-        // C'est ce qui permet à @AuthenticationPrincipal UserDetailsImpl de fonctionner
+        }   
         return UserDetailsImpl.build(user);
     }
     

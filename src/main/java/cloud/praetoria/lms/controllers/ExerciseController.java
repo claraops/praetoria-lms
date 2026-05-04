@@ -32,7 +32,7 @@ public class ExerciseController {
     public ResponseEntity<ApiResponse<List<ExerciseResponse>>> getAllExercises(
     		@AuthenticationPrincipal UserDetailsImpl userDetails) {
     	
-    	 // Vérification de sécurité (sans commentaire bloquant)
+    	
         if (userDetails == null) {
             log.error("userDetails est null - Vérifiez la configuration Spring Security");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)

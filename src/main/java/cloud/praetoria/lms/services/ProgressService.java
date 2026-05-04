@@ -44,6 +44,8 @@ public class ProgressService {
     private final QuizRepository quizRepository;
     private final ModuleRepository moduleRepository;
     private final BlockRepository blockRepository;
+    //private final GamificationService gamificationService;
+
     
     private final UserCourseProgressRepository userCourseProgressRepository;
     private final UserExerciseProgressRepository userExerciseProgressRepository;
@@ -53,8 +55,8 @@ public class ProgressService {
     private static final int XP_PER_COURSE_COMPLETION = 10;
     private static final int XP_PER_MODULE_COMPLETION = 50;
     
-    // ==================== GESTION DES COURS ====================
     
+    //gestion des cours
     @Transactional
     public UserCourseProgress startCourse(Long userId, Long courseId) {
         User user = getUserById(userId);
@@ -88,22 +90,18 @@ public class ProgressService {
         if (!progress.getCompleted()) {
             progress.setCompleted(true);
             progress.setCompletedAt(LocalDateTime.now());
-            
-            // Ajout XP
+
             user.setXp(user.getXp() + XP_PER_COURSE_COMPLETION);
-            userRepository.save(user);
+            	userRepository.save(user);
             
             log.info("User {} completed course {} (+{} XP)", 
                     user.getEmail(), course.getName(), XP_PER_COURSE_COMPLETION);
-            
-            // Vérifier complétion du module
+
             checkAndAwardModuleBonus(user, course.getModule());
         }
         
         return userCourseProgressRepository.save(progress);
     }
-    
-    // ==================== GESTION DES EXERCICES ====================
     
     @Transactional
     public UserExerciseProgress completeExercise(Long userId, Long exerciseId, Integer score) {
@@ -132,14 +130,11 @@ public class ProgressService {
             log.info("User {} completed exercise {} (score: {})", 
                     user.getEmail(), exercise.getName(), score);
             
-            // Vérifier complétion du module (pas d'XP direct pour exercice)
-            checkAndAwardModuleBonus(user, exercise.getModule());
+                        checkAndAwardModuleBonus(user, exercise.getModule());
         }
         
         return userExerciseProgressRepository.save(progress);
     }
-    
-    // ==================== GESTION DES QUIZ ====================
     
     @Transactional
     public UserQuizProgress completeQuiz(Long userId, Long quizId, Integer score) {
@@ -177,18 +172,11 @@ public class ProgressService {
         
         return userQuizProgressRepository.save(progress);
     }
-    
-    // ==================== VÉRIFICATION DES BONUS ====================
-    
+
     private void checkAndAwardModuleBonus(User user, Module module) {
         if (module == null) return;
         
         if (isModuleCompleted(user, module)) {
-            // Vérifier si bonus déjà donné (via un flag ou vérification XP)
-            // Pour simplifier, on vérifie si tous les cours/exos/quiz sont complétés
-            // mais on évite le double bonus en vérifiant une condition spécifique
-            
-            // Ajout XP bonus module
             user.setXp(user.getXp() + XP_PER_MODULE_COMPLETION);
             userRepository.save(user);
             
@@ -196,23 +184,18 @@ public class ProgressService {
                     user.getEmail(), module.getName(), XP_PER_MODULE_COMPLETION);
         }
     }
-    
-    
-    // ==================== MÉTHODES DE VÉRIFICATION ====================
-    
+
     @Transactional(readOnly = true)
     public boolean isModuleCompleted(User user, Module module) {
         if (module == null) return false;
-        
-        // Vérifier tous les cours du module
+    
         List<Course> courses = module.getCourses();
         for (Course course : courses) {
             boolean courseCompleted = userCourseProgressRepository
                     .existsByUserAndCourseAndCompletedTrue(user, course);
             if (!courseCompleted) return false;
         }
-        
-        // Vérifier tous les exercices du module
+
         List<Exercise> exercises = module.getExercises();
         for (Exercise exercise : exercises) {
             boolean exerciseCompleted = userExerciseProgressRepository
@@ -221,8 +204,7 @@ public class ProgressService {
                     .orElse(false);
             if (!exerciseCompleted) return false;
         }
-        
-        // Vérifier le quiz si présent
+
         if (module.getQuiz() != null) {
             return userQuizProgressRepository
                     .existsByUserAndQuizAndCompletedTrue(user, module.getQuiz());
@@ -231,21 +213,18 @@ public class ProgressService {
         return true;
     }
     
-    // ==================== RÉCUPÉRATION DES PROGRESSIONS ====================
     
     @Transactional(readOnly = true)
     public ModuleProgressDTO getUserProgressForModule(Long userId, Long moduleId) {
         User user = getUserById(userId);
         Module module = getModuleById(moduleId);
-        
-        // Statistiques cours
+ 
         List<Course> courses = module.getCourses();
         long completedCourses = courses.stream()
                 .filter(course -> userCourseProgressRepository
                         .existsByUserAndCourseAndCompletedTrue(user, course))
                 .count();
-        
-        // Statistiques exercices
+
         List<Exercise> exercises = module.getExercises();
         long completedExercises = exercises.stream()
                 .filter(exercise -> userExerciseProgressRepository
@@ -253,8 +232,7 @@ public class ProgressService {
                         .map(UserExerciseProgress::getCompleted)
                         .orElse(false))
                 .count();
-        
-        // Statistiques quiz
+ 
         boolean hasQuiz = module.getQuiz() != null;
         boolean quizCompleted = false;
         Integer quizScore = null;
@@ -270,8 +248,7 @@ public class ProgressService {
                 quizAttempts = quizProgress.getAttempts();
             }
         }
-        
-        // Calcul progression module
+
         int totalItems = courses.size() + exercises.size() + (hasQuiz ? 1 : 0);
         int completedItems = (int)(completedCourses + completedExercises + (quizCompleted ? 1 : 0));
         double percentComplete = totalItems > 0 ? (completedItems * 100.0 / totalItems) : 0.0;
@@ -298,8 +275,7 @@ public class ProgressService {
     @Transactional(readOnly = true)
     public OverallProgressDTO getUserOverallProgress(Long userId) {
         User user = getUserById(userId);
-        
-        // Statistiques globales
+   
         long totalCoursesCompleted = userCourseProgressRepository.countCompletedCoursesByUser(user);
         long totalCoursesStarted = userCourseProgressRepository.countStartedCoursesByUser(user);
         
@@ -309,7 +285,6 @@ public class ProgressService {
         long totalQuizzesCompleted = userQuizProgressRepository.countByUserAndCompletedTrue(user);
         long totalQuizzesStarted = userQuizProgressRepository.countStartedQuizzesByUser(user);
         
-        // Parcours des blocs pour compter les modules
         List<Block> userBlocks = user.getBlocks();
         long totalModules = 0;
         long completedModules = 0;
@@ -322,17 +297,14 @@ public class ProgressService {
                 }
             }
         }
-        
-        // Calcul des taux et score moyen
+
         double coursesRate = totalCoursesStarted > 0 ? (totalCoursesCompleted * 100.0 / totalCoursesStarted) : 0;
         double exercisesRate = totalExercisesStarted > 0 ? (totalExercisesCompleted * 100.0 / totalExercisesStarted) : 0;
         double quizzesRate = totalQuizzesStarted > 0 ? (totalQuizzesCompleted * 100.0 / totalQuizzesStarted) : 0;
         double overallRate = totalModules > 0 ? (completedModules * 100.0 / totalModules) : 0;
-        
-        // Score moyen des quiz
+
         double avgQuizScore = calculateAverageQuizScore(user);
-        
-        // Niveau (basé sur XP)
+
         int currentLevel = calculateLevelFromXp(user.getXp());
         
         return OverallProgressDTO.builder()
@@ -356,8 +328,6 @@ public class ProgressService {
                 .nextRecommendedAction(determineNextAction(user, userBlocks))
                 .build();
     }
-    
-    // ==================== MÉTHODES PRIVÉES UTILITAIRES ====================
     
     private User getUserById(Long id) {
         return userRepository.findById(id)
@@ -404,12 +374,10 @@ public class ProgressService {
     }
     
     private int calculateLevelFromXp(int xp) {
-        // Formule simple : niveau = 1 + (XP / 100)
         return 1 + (xp / 100);
     }
     
     private String determineNextAction(User user, List<Block> blocks) {
-        // Trouver le premier cours non complété
         for (Block block : blocks) {
             for (Module module : block.getModules()) {
                 for (Course course : module.getCourses()) {

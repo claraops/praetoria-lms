@@ -1,21 +1,21 @@
 package cloud.praetoria.lms.dtos;
 
-import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
-public class BlockRequest {
-
-    @NotBlank(message = "Le nom du bloc est obligatoire")
+public class BadgeDTO {
+    private Long badgeId;
     private String name;
-
+    private String displayName;
     private String description;
-
-    private String cover;
-}                
+    private String iconUrl;
+    private String criteria;
+    private Boolean earned;
+    private String earnedAt;
+}

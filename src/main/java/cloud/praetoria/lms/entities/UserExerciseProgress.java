@@ -40,7 +40,7 @@ public class UserExerciseProgress {
     @Column(name = "completed_at")
     private LocalDateTime completedAt;
 
-    private Integer score; // nullable
+    private Integer score; 
 
     @Column(name = "started_at")
     private LocalDateTime startedAt;

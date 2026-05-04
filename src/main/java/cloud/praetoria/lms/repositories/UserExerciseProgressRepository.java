@@ -20,31 +20,25 @@ import cloud.praetoria.lms.entities.UserExerciseProgress;
 @Repository
 public interface UserExerciseProgressRepository extends JpaRepository<UserExerciseProgress, Long> {
 
-    // Recherches de base
     Optional<UserExerciseProgress> findByUserAndExercise(User user, Exercise exercise);
     List<UserExerciseProgress> findByUser(User user);
 
-    // Parcours via relation Exercise -> Module
     @Query("SELECT uep FROM UserExerciseProgress uep WHERE uep.user = :user AND uep.exercise.module = :module")
     List<UserExerciseProgress> findByUserAndExerciseModule(@Param("user") User user, 
                                                              @Param("module") Module module);
 
-    // Comptages
     long countByUserAndCompletedTrue(User user);
 
     @Query("SELECT COUNT(uep) FROM UserExerciseProgress uep WHERE uep.user = :user AND uep.exercise.module = :module AND uep.completed = true")
     long countByUserAndExerciseModuleAndCompletedTrue(@Param("user") User user, 
                                                         @Param("module") Module module);
 
-    // Progression par utilisateur
     List<UserExerciseProgress> findByUserAndStartedAtIsNotNull(User user);
     Page<UserExerciseProgress> findByUserAndCompletedTrue(User user, Pageable pageable);
 
-    // Compteurs supplémentaires
     @Query("SELECT COUNT(uep) FROM UserExerciseProgress uep WHERE uep.user = :user AND uep.startedAt IS NOT NULL")
     long countStartedExercisesByUser(@Param("user") User user);
 
-    // Suppressions
     @Modifying
     @Transactional
     @Query("DELETE FROM UserExerciseProgress uep WHERE uep.user = :user")

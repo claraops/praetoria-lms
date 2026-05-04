@@ -19,29 +19,22 @@ import cloud.praetoria.lms.entities.UserQuizProgress;
 @Repository
 public interface UserQuizProgressRepository extends JpaRepository<UserQuizProgress, Long> {
 
-    // Recherches de base
     Optional<UserQuizProgress> findByUserAndQuiz(User user, Quiz quiz);
     List<UserQuizProgress> findByUser(User user);
 
-    // Comptages
     long countByUserAndCompletedTrue(User user);
     
-    // Progression par utilisateur
     List<UserQuizProgress> findByUserAndStartedAtIsNotNull(User user);
     Page<UserQuizProgress> findByUserAndCompletedTrue(User user, Pageable pageable);
 
-    // Compteurs supplémentaires
     @Query("SELECT COUNT(uqp) FROM UserQuizProgress uqp WHERE uqp.user = :user AND uqp.startedAt IS NOT NULL")
     long countStartedQuizzesByUser(@Param("user") User user);
 
-    // Vérification existence
     boolean existsByUserAndQuizAndCompletedTrue(User user, Quiz quiz);
 
-    // Score minimum (pour certification par exemple)
     @Query("SELECT COUNT(uqp) FROM UserQuizProgress uqp WHERE uqp.user = :user AND uqp.completed = true AND uqp.score >= :minScore")
     long countCompletedQuizzesByUserWithMinScore(@Param("user") User user, @Param("minScore") int minScore);
 
-    // Suppressions
     @Modifying
     @Transactional
     @Query("DELETE FROM UserQuizProgress uqp WHERE uqp.user = :user")

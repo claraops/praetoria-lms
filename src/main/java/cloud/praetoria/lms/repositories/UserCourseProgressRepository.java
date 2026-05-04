@@ -20,32 +20,26 @@ import cloud.praetoria.lms.entities.UserCourseProgress;
 @Repository
 public interface UserCourseProgressRepository extends JpaRepository<UserCourseProgress, Long> {
 
-    // Recherches de base
     Optional<UserCourseProgress> findByUserAndCourse(User user, Course course);
     List<UserCourseProgress> findByUser(User user);
 
-    // Parcours via relation Course -> Module
     @Query("SELECT ucp FROM UserCourseProgress ucp WHERE ucp.user = :user AND ucp.course.module = :module")
     List<UserCourseProgress> findByUserAndCourseModule(@Param("user") User user, 
                                                          @Param("module") Module module);
 
-    // Comptages
     long countByUserAndCompletedTrue(User user);
 
     @Query("SELECT COUNT(ucp) FROM UserCourseProgress ucp WHERE ucp.user = :user AND ucp.course.module = :module AND ucp.completed = true")
     long countByUserAndCourseModuleAndCompletedTrue(@Param("user") User user, 
                                                       @Param("module") Module module);
-
-    // Existence
+    
+    
     boolean existsByUserAndCourseAndCompletedTrue(User user, Course course);
 
-    // Progression par utilisateur (démarrés)
     List<UserCourseProgress> findByUserAndStartedAtIsNotNull(User user);
 
-    // Pagination des cours complétés
     Page<UserCourseProgress> findByUserAndCompletedTrue(User user, Pageable pageable);
 
-    // Compteurs supplémentaires
     @Query("SELECT COUNT(ucp) FROM UserCourseProgress ucp WHERE ucp.user = :user")
     long countByUser(@Param("user") User user);
 
@@ -55,8 +49,7 @@ public interface UserCourseProgressRepository extends JpaRepository<UserCoursePr
     @Query("SELECT COUNT(ucp) FROM UserCourseProgress ucp WHERE ucp.user = :user AND ucp.completed = true")
     long countCompletedCoursesByUser(@Param("user") User user);
     
-  
-    // Suppressions
+    
     @Modifying
     @Transactional
     @Query("DELETE FROM UserCourseProgress ucp WHERE ucp.user = :user")

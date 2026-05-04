@@ -74,6 +74,7 @@ public class ProgressController {
             @AuthenticationPrincipal UserDetailsImpl userDetails,
             @PathVariable Long quizId,
             @RequestParam Integer score) {
+    	//@RequestParam(required = false) Integer score){
         progressService.completeQuiz(userDetails.getId(), quizId, score);
         return ResponseEntity.ok(ApiResponse.successVoid("Quiz completed"));
     }
