@@ -29,16 +29,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Query("SELECT u FROM User u WHERE u.organization = :org AND u.isActive = true ORDER BY u.createdAt DESC")
     Iterable<User> findAllActiveByOrganization(@Param("org") Organization org);
 
-
-    /*@Query("SELECT c.id FROM User u JOIN u.completedCourses c WHERE u.id = :userId")
-    Set<Long> findCompletedCourseIdsByUserId(@Param("userId") Long userId);
-
-    @Query("SELECT e.id FROM User u JOIN u.completedExercises e WHERE u.id = :userId")
-    Set<Long> findCompletedExerciseIdsByUserId(@Param("userId") Long userId);
-
-    @Query("SELECT q.id FROM User u JOIN u.completedQuizzes q WHERE u.id = :userId")
-    Set<Long> findCompletedQuizIdsByUserId(@Param("userId") Long userId);*/
-
     List<User> findByPromotionId(Long promotionId);
     List<User> findByPromotion(Promotion promotion);
     

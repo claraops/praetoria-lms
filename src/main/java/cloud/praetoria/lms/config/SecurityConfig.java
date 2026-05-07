@@ -118,7 +118,7 @@ public class SecurityConfig {
             .exceptionHandling(exception -> exception
                 .authenticationEntryPoint(jwtAuthenticationEntryPoint)
                 .accessDeniedHandler(jwtAccessDeniedHandler)
-            );
+            ); 
         
         http.headers(headers -> headers.frameOptions(frameOptions -> frameOptions.disable()));
         

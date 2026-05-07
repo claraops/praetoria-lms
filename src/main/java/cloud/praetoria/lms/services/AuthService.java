@@ -43,9 +43,12 @@ public class AuthService {
 	    private final RefreshTokenRepository refreshTokenRepository;
 	    private final PasswordEncoder passwordEncoder;
 	    private final AuthenticationManager authenticationManager;
-	    private final JwtTokenProvider jwtTokenProvider;
+	    private final JwtTokenProvider jwtTokenProvider;  
+
+
 	    
-	    // ✅ NOUVELLE MÉTHODE : Récupérer l'utilisateur courant
+	    
+	    // Récupérer l'utilisateur courant
 	    public User getCurrentUser() {
 	        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 	        if (authentication == null || !authentication.isAuthenticated()) {
@@ -113,6 +116,8 @@ public class AuthService {
             .build();
         
         userRepository.save(user);
+        
+
         log.info("Utilisateur créé avec succès: {} dans l'organisation: {}", 
             request.getEmail(), organization.getName());
     }
