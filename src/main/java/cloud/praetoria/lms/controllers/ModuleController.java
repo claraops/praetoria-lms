@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import cloud.praetoria.lms.dtos.ApiResponse;
 import cloud.praetoria.lms.dtos.ModuleRequest;
 import cloud.praetoria.lms.dtos.ModuleResponse;
+import cloud.praetoria.lms.security.UserDetailsImpl;
 import cloud.praetoria.lms.services.ModuleService;
 
 import java.util.List;
@@ -28,9 +29,12 @@ public class ModuleController {
     @GetMapping
     @Operation(summary = "Lister tous les modules")
     public ResponseEntity<ApiResponse<List<ModuleResponse>>> getAllModules() {
+    	
+    	
         List<ModuleResponse> modules = moduleService.getAllModules();
         return ResponseEntity.ok(ApiResponse.success(modules));
     }
+    
 
     @GetMapping("/{id}")
     @Operation(summary = "Récupérer un module par son identifiant")
