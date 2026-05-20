@@ -1,3 +1,4 @@
+
 package cloud.praetoria.lms.services;
 
 import java.time.LocalDateTime;
@@ -44,19 +45,18 @@ public class ProgressService {
     private final QuizRepository quizRepository;
     private final ModuleRepository moduleRepository;
     private final BlockRepository blockRepository;
-    //private final GamificationService gamificationService;
+    private final GamificationService gamificationService;
 
     
     private final UserCourseProgressRepository userCourseProgressRepository;
     private final UserExerciseProgressRepository userExerciseProgressRepository;
     private final UserQuizProgressRepository userQuizProgressRepository;
     
-    // Constantes XP
+    
     private static final int XP_PER_COURSE_COMPLETION = 10;
     private static final int XP_PER_MODULE_COMPLETION = 50;
     
-    
-    //gestion des cours
+
     @Transactional
     public UserCourseProgress startCourse(Long userId, Long courseId) {
         User user = getUserById(userId);
@@ -92,6 +92,10 @@ public class ProgressService {
             progress.setCompletedAt(LocalDateTime.now());
 
             user.setXp(user.getXp() + XP_PER_COURSE_COMPLETION);
+         /*Dans completeCourse()
+            user.addXp(XP_PER_COURSE_COMPLETION); /Existant*/
+            gamificationService.addXp(user, XP_PER_COURSE_COMPLETION); // AJOUTER
+
             	userRepository.save(user);
             
             log.info("User {} completed course {} (+{} XP)", 
@@ -163,7 +167,7 @@ public class ProgressService {
             log.info("User {} completed quiz {} (score: {}, attempts: {})", 
                     user.getEmail(), quiz.getName(), score, progress.getAttempts());
             
-            // Vérifier complétion du module
+            
             Module module = getModuleByQuiz(quiz);
             if (module != null) {
                 checkAndAwardModuleBonus(user, module);
