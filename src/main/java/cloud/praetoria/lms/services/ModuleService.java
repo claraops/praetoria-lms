@@ -5,8 +5,8 @@ import cloud.praetoria.lms.dtos.ModuleResponse;
 import java.util.List;
 
 public interface ModuleService {
-
-    List<ModuleResponse> getAllModules();
+	
+	 List<ModuleResponse> getAllModules();
 
     ModuleResponse getModuleById(Long id);
 

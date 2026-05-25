@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -25,12 +26,20 @@ public class ModuleServiceImpl implements ModuleService {
     private final ModuleRepository moduleRepository;
     private final BlockRepository blockRepository;
 
-    @Override
+    /*@Override
     public List<ModuleResponse> getAllModules() {
         log.debug("Récupération de tous les modules");
         return moduleRepository.findAll().stream()
                 .map(ModuleResponse::fromEntity)
                 .toList();
+    }*/
+    
+    @Override
+    public List<ModuleResponse> getAllModules() {
+        List<Module> modules = moduleRepository.findAll();
+        return modules.stream()
+                .map(ModuleResponse::fromEntity)  // ou fromEntityWithDetails selon besoin
+                .collect(Collectors.toList());
     }
 
     @Override

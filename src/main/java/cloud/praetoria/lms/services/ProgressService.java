@@ -9,7 +9,7 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import cloud.praetoria.lms.dtos.CourseProgressDTO;
+//import cloud.praetoria.lms.dtos.CourseProgressDTO;
 import cloud.praetoria.lms.dtos.ModuleProgressDTO;
 import cloud.praetoria.lms.dtos.OverallProgressDTO;
 import cloud.praetoria.lms.entities.Block;
@@ -92,9 +92,7 @@ public class ProgressService {
             progress.setCompletedAt(LocalDateTime.now());
 
             user.setXp(user.getXp() + XP_PER_COURSE_COMPLETION);
-         /*Dans completeCourse()
-            user.addXp(XP_PER_COURSE_COMPLETION); /Existant*/
-            gamificationService.addXp(user, XP_PER_COURSE_COMPLETION); // AJOUTER
+            gamificationService.addXp(user, XP_PER_COURSE_COMPLETION); 
 
             	userRepository.save(user);
             

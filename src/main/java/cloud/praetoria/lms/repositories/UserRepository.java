@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import cloud.praetoria.lms.entities.Block;
 import cloud.praetoria.lms.entities.Organization;
 import cloud.praetoria.lms.entities.Promotion;
 import cloud.praetoria.lms.entities.User;
@@ -17,7 +18,7 @@ import cloud.praetoria.lms.entities.User;
 public interface UserRepository extends JpaRepository<User, Long> {
     
     Optional<User> findByEmail(String email);
-    
+
     boolean existsByEmail(String email);
     
     @Query("SELECT u FROM User u WHERE u.email = :email AND u.isActive = true")
@@ -28,6 +29,10 @@ public interface UserRepository extends JpaRepository<User, Long> {
     
     @Query("SELECT u FROM User u WHERE u.organization = :org AND u.isActive = true ORDER BY u.createdAt DESC")
     Iterable<User> findAllActiveByOrganization(@Param("org") Organization org);
+    
+
+    @Query("SELECT u FROM User u JOIN u.blocks b WHERE b = :block")
+    List<User> findByBlocksContaining(@Param("block") Block block);
 
     List<User> findByPromotionId(Long promotionId);
     List<User> findByPromotion(Promotion promotion);

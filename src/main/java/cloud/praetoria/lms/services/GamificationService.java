@@ -30,7 +30,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
-
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -41,7 +40,6 @@ public class GamificationService {
     private final BadgeRepository badgeRepository;
     private final UserBadgeRepository userBadgeRepository;
     private final UserRepository userRepository;
-    //private final GamificationService gamificationService;
     private final UserCourseProgressRepository userCourseProgressRepository;
     private final UserQuizProgressRepository userQuizProgressRepository;
     private final CourseRepository courseRepository;
@@ -107,15 +105,13 @@ public class GamificationService {
             if (userBadgeRepository.existsByUserAndBadge(user, badge)) {
                 continue;
             }
-
-            //pas encore implementer
             
-           /* boolean shouldAward = checkBadgeCriteria(user, badge, gamification);
+           boolean shouldAward = checkBadgeCriteria(user, badge, gamification);
             
             if (shouldAward) {
                 awardBadge(user, badge);
                 awardedBadges.add(badge);
-            }*/
+            }
         }
 
         if (!awardedBadges.isEmpty()) {
@@ -128,9 +124,7 @@ public class GamificationService {
     /**
      * Vérifie les critères spécifiques d'un badge
      *****/
-    
-    //pas encore implementer
-    /*private boolean checkBadgeCriteria(User user, Badge badge, UserGamification gamification) {
+    private boolean checkBadgeCriteria(User user, Badge badge, UserGamification gamification) {
         return switch (badge.getName()) {
             case "FIRST_COURSE" -> hasCompletedFirstCourse(user);
             case "MODULE_COMPLETED" -> hasCompletedModule(user);
@@ -145,15 +139,14 @@ public class GamificationService {
         };
     }
     
-    *
-    */
+    
     private boolean hasCompletedFirstCourse(User user) {
 			    return userCourseProgressRepository.countByUserAndCompletedTrue(user) > 0;
 			}
 			
 			private boolean hasCompletedModule(User user) {
 				
-			    // Logique : vérifier s'il existe un module dont tous les cours sont complétés
+			    // a faire plus tard ( vérifier s'il existe un module dont tous les cours sont complétés)
 			    // Utilisez UserCourseProgressRepository et CourseRepository
 				return false;
 			}
