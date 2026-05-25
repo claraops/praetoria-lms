@@ -1,6 +1,6 @@
 package cloud.praetoria.lms.config;
 
-import org.springframework.context.annotation.Lazy;  // ← Import correct
+import org.springframework.context.annotation.Lazy;  
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -39,7 +39,6 @@ public class SecurityConfig {
     private final JwtAccessDeniedHandler jwtAccessDeniedHandler;
     private final UserRepository userRepository;
 
-    // Constructeur explicite avec @Lazy sur UserDetailsService pour briser le cycle
     public SecurityConfig(@Lazy UserDetailsService userDetailsService,
                           JwtTokenProvider tokenProvider,
                           JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint,
