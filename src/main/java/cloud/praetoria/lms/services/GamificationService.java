@@ -10,6 +10,7 @@ import cloud.praetoria.lms.dtos.GamificationProfileDTO;
 import cloud.praetoria.lms.dtos.LeaderboardDTO;
 import cloud.praetoria.lms.dtos.LeaderboardEntryDTO;
 import cloud.praetoria.lms.entities.Badge;
+import cloud.praetoria.lms.entities.Block;
 import cloud.praetoria.lms.entities.User;
 import cloud.praetoria.lms.entities.UserBadge;
 import cloud.praetoria.lms.entities.UserGamification;
@@ -145,11 +146,29 @@ public class GamificationService {
 			}
 			
 			private boolean hasCompletedModule(User user) {
-				
-			    // a faire plus tard ( vérifier s'il existe un module dont tous les cours sont complétés)
-			    // Utilisez UserCourseProgressRepository et CourseRepository
-				return false;
+			   /* // Parcourir tous les blocs assignés à l'utilisateur
+			    List<Block> userBlocks = user.getBlocks();
+			    for (Block block : userBlocks) {
+			        for (Module module : block.getModules()) {
+			            // Vérifier si le module est complété
+			            boolean allCoursesCompleted = module.getCourses().stream()
+			                .allMatch(course -> userCourseProgressRepository
+			                    .existsByUserAndCourseAndCompletedTrue(user, course));
+			            boolean allExercisesCompleted = module.getExercises().stream()
+			                .allMatch(exercise -> userExerciseProgressRepository
+			                    .findByUserAndExercise(user, exercise)
+			                    .map(UserExerciseProgress::getCompleted).orElse(false));
+			            boolean quizCompleted = module.getQuiz() == null || 
+			                userQuizProgressRepository.existsByUserAndQuizAndCompletedTrue(user, module.getQuiz());
+			            
+			            if (allCoursesCompleted && allExercisesCompleted && quizCompleted) {
+			                return true;
+			            }
+			        }
+			    }*/
+			    return false;
 			}
+			
 			
 			private boolean hasCompletedTenQuizzes(User user) {
 			    return userQuizProgressRepository.countByUserAndCompletedTrue(user) >= 10;
@@ -235,19 +254,26 @@ public class GamificationService {
     /**
      * Récupère le classement global (top 10)
      */
-    @Transactional(readOnly = true)
-    public LeaderboardDTO getLeaderboard() {
+    
+    public LeaderboardDTO getLeaderboard(Long currentUserId) {
         List<UserGamification> topUsers = userGamificationRepository.findTop10ByOrderByTotalXpDesc();
         
         List<LeaderboardEntryDTO> entries = new ArrayList<>();
         int rank = 1;
+        LeaderboardEntryDTO currentUserEntry = null;
+        
         for (UserGamification ug : topUsers) {
-            entries.add(buildLeaderboardEntry(ug, rank++));
+            LeaderboardEntryDTO entry = buildLeaderboardEntry(ug, rank++);
+            entries.add(entry);
+            if (ug.getUser().getId().equals(currentUserId)) {
+                currentUserEntry = entry;
+            }
         }
         
         return LeaderboardDTO.builder()
                 .entries(entries)
-                .totalUsers(entries.size())
+                .userRank(currentUserEntry)
+                .totalUsers((int) userGamificationRepository.count())
                 .build();
     }
 

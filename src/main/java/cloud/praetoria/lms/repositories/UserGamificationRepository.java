@@ -16,7 +16,7 @@ public interface UserGamificationRepository extends JpaRepository<UserGamificati
 
     Optional<UserGamification> findByUser(User user);
 
-    @Query("SELECT ug FROM UserGamification ug ORDER BY ug.totalXp DESC")
+    //@Query("SELECT ug FROM UserGamification ug ORDER BY ug.totalXp DESC")
     List<UserGamification> findTop10ByOrderByTotalXpDesc();
 
     @Query("SELECT ug FROM UserGamification ug WHERE ug.user.organization.id = :organizationId ORDER BY ug.totalXp DESC")

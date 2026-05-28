@@ -19,36 +19,32 @@ import cloud.praetoria.lms.entities.UserCourseProgress;
 
 @Repository
 public interface UserCourseProgressRepository extends JpaRepository<UserCourseProgress, Long> {
-
+    
     Optional<UserCourseProgress> findByUserAndCourse(User user, Course course);
+    
     List<UserCourseProgress> findByUser(User user);
 
     @Query("SELECT ucp FROM UserCourseProgress ucp WHERE ucp.user = :user AND ucp.course.module = :module")
     List<UserCourseProgress> findByUserAndCourseModule(@Param("user") User user, 
                                                          @Param("module") Module module);
-
+    
     long countByUserAndCompletedTrue(User user);
+    
+    long countByUser(User user);
+    
+    long countStartedCoursesByUser(User user);
 
+    
     @Query("SELECT COUNT(ucp) FROM UserCourseProgress ucp WHERE ucp.user = :user AND ucp.course.module = :module AND ucp.completed = true")
     long countByUserAndCourseModuleAndCompletedTrue(@Param("user") User user, 
                                                       @Param("module") Module module);
     
-    
     boolean existsByUserAndCourseAndCompletedTrue(User user, Course course);
-
+    
     List<UserCourseProgress> findByUserAndStartedAtIsNotNull(User user);
 
     Page<UserCourseProgress> findByUserAndCompletedTrue(User user, Pageable pageable);
 
-    @Query("SELECT COUNT(ucp) FROM UserCourseProgress ucp WHERE ucp.user = :user")
-    long countByUser(@Param("user") User user);
-
-    @Query("SELECT COUNT(ucp) FROM UserCourseProgress ucp WHERE ucp.user = :user AND ucp.startedAt IS NOT NULL")
-    long countStartedCoursesByUser(@Param("user") User user);
-
-    @Query("SELECT COUNT(ucp) FROM UserCourseProgress ucp WHERE ucp.user = :user AND ucp.completed = true")
-    long countCompletedCoursesByUser(@Param("user") User user);
-    
     
     @Modifying
     @Transactional
