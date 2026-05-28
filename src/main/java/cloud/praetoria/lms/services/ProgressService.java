@@ -278,7 +278,7 @@ public class ProgressService {
     public OverallProgressDTO getUserOverallProgress(Long userId) {
         User user = getUserById(userId);
    
-        long totalCoursesCompleted = userCourseProgressRepository.countCompletedCoursesByUser(user);
+        long totalCoursesCompleted = userCourseProgressRepository.countByUserAndCompletedTrue(user);
         long totalCoursesStarted = userCourseProgressRepository.countStartedCoursesByUser(user);
         
         long totalExercisesCompleted = userExerciseProgressRepository.countByUserAndCompletedTrue(user);

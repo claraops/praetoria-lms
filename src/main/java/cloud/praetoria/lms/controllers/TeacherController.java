@@ -100,18 +100,11 @@ public class TeacherController {
      */
     private ModuleResponse convertToModuleResponse(Module module) {
     	 return ModuleResponse.fromEntity(module);
-        /*return ModuleResponse.builder()
-                .id(module.getId())
-                .name(module.getName())
-                .description(module.getDescription())
-                .blockId(module.getBlock() != null ? module.getBlock().getId() : null)
-                .blockName(module.getBlock() != null ? module.getBlock().getName() : null)
-                .quizId(module.getQuiz() != null ? module.getQuiz().getId() : null)
-                .quizName(module.getQuiz() != null ? module.getQuiz().getName() : null)
-                .createdAt(module.getCreatedAt())
-                .updatedAt(module.getUpdatedAt())
-                .build();*/
     }
+    
+    
+    
+    
 
     @lombok.Data
     @lombok.Builder
