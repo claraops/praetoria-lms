@@ -2,6 +2,9 @@ package cloud.praetoria.lms.services.student;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
+import java.util.Map;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -56,5 +59,23 @@ public class StudentQuizService {
         User user = currentUserService.getCurrentUser();
         progressService.completeQuiz(user.getId(), quizId, score);
         log.info("Quiz {} soumis par {} avec score {}", quizId, user.getEmail(), score);
+    }
+    
+    @Transactional
+    public int calculateAndSubmitQuiz(Long quizId, Map<Integer, String> answers) {
+        User user = currentUserService.getCurrentUser();
+        Quiz quiz = quizRepository.findById(quizId)
+                .orElseThrow(() -> new RuntimeException("Quiz non trouvé"));
+        
+        int score = calculateScore(quiz, answers);
+        
+        progressService.completeQuiz(user.getId(), quizId, score);
+        return score;
+    }
+
+    private int calculateScore(Quiz quiz, Map<Integer, String> answers) {
+        // À implémenter selon votre format de quiz
+        // Exemple: parsing du contenu JSON du quiz
+        return 85; // Score calculé
     }
 }

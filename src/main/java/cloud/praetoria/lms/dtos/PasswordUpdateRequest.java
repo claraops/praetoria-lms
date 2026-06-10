@@ -13,13 +13,13 @@ import lombok.NoArgsConstructor;
 @Builder
 public class PasswordUpdateRequest {
 
-    @NotBlank(message = "Le mot de passe actuel est obligatoire")
-    private String currentPassword;
+	@NotBlank(message = "Mot de passe actuel est requis")
+	private String currentPassword;
 
-    @NotBlank(message = "Le nouveau mot de passe est obligatoire")
-    @Size(min = 6, message = "Le mot de passe doit contenir au moins 6 caractères")
-    private String newPassword;
+	@NotBlank(message = "Nouveau mot de passe est requis")
+	@Size(min = 8, max = 100, message = "Mot de passe doit être entre 8 et 100 caractères")
+	private String newPassword;
 
-    @NotBlank(message = "La confirmation du mot de passe est obligatoire")
-    private String confirmPassword;
+	@NotBlank(message = "Confirmation du mot de passe est requise")
+	private String confirmPassword;
 }

@@ -17,6 +17,4 @@ public interface CourseService {
     CourseResponse updateCourse(Long id, CourseRequest courseRequest);
 
     void deleteCourse(Long id);
-
-    CourseResponse toggleCompleted(Long courseId, Long userId);
 }

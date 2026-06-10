@@ -43,15 +43,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                         new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
                     authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                     SecurityContextHolder.getContext().setAuthentication(authentication);
-                    log.debug("✅ Authentification placée dans le contexte pour: {}", email);
+                    log.debug("Authentification placee dans le contexte pour: {}", email);
                 }
             } else {
-                log.debug("❌ Pas de JWT valide dans la requête");
+                log.debug("Pas de JWT valide dans la requete");
             }
         } catch (Exception ex) {
-            log.error("❌ Erreur lors de l'authentification JWT", ex);
+            log.error("Erreur lors de l'authentification JWT", ex);
         }
-        
+
         filterChain.doFilter(request, response);
     }
 
@@ -63,13 +63,3 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         return null;
     }
 }
-
-
-
-
-
-
-
-
-
-

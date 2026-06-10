@@ -15,6 +15,9 @@ import cloud.praetoria.lms.dtos.LeaderboardDTO;
 import cloud.praetoria.lms.entities.User;
 import cloud.praetoria.lms.services.CurrentUserService;
 import cloud.praetoria.lms.services.GamificationService;
+import cloud.praetoria.lms.entities.Badge;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @RestController
@@ -47,21 +50,27 @@ public class GamificationController {
     @Operation(summary = "Obtenir le classement global (top 10)")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ApiResponse<LeaderboardDTO>> getLeaderboard() {
-        LeaderboardDTO leaderboard = gamificationService.getLeaderboard();
+        Long currentUserId = currentUserService.getCurrentUserId();
+        LeaderboardDTO leaderboard = gamificationService.getLeaderboard(currentUserId);
         return ResponseEntity.ok(ApiResponse.success(leaderboard));
     }
 
     @GetMapping("/leaderboard/organization")
     @Operation(summary = "Obtenir le classement par organisation")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("hasAnyRole('TEACHER', 'ADMIN')") 
     public ResponseEntity<ApiResponse<LeaderboardDTO>> getOrganizationLeaderboard(
             @RequestParam Long organizationId) {
+        User currentUser = currentUserService.getCurrentUser();
+        if (!currentUser.getOrganization().getId().equals(organizationId) 
+            && !currentUser.getRole().getRoleName().toString().equals("ROLE_ADMIN")) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(ApiResponse.error("Accès non autorisé à cette organisation"));
+        }
         LeaderboardDTO leaderboard = gamificationService.getOrganizationLeaderboard(organizationId);
         return ResponseEntity.ok(ApiResponse.success(leaderboard));
     }
 
-    // ==================== MES NOUVEAUX ENDPOINTS DE GAMING ====================
-
+    // pour le gaming endpoint
     @GetMapping("/me")
     @Operation(summary = "Profil de gamification de l'utilisateur connecté (alias)")
     @PreAuthorize("isAuthenticated()")
@@ -71,21 +80,12 @@ public class GamificationController {
         return ResponseEntity.ok(ApiResponse.success(profile));
     }
 
-    @GetMapping("/badges")
-    @Operation(summary = "Liste de tous les badges disponibles")
-    @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<ApiResponse<?>> getAllBadges() {
-        // À implémenter si besoin - retourne la liste de tous les badges
-        return ResponseEntity.ok(ApiResponse.successVoid("Endpoint à implémenter"));
-    }
-
     @GetMapping("/my-badges")
     @Operation(summary = "Badges débloqués par l'utilisateur connecté")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ApiResponse<GamificationProfileDTO>> getMyBadges() {
         Long userId = currentUserService.getCurrentUserId();
         GamificationProfileDTO profile = gamificationService.getGamificationProfile(userId);
-        // Les badges sont déjà dans le DTO
         return ResponseEntity.ok(ApiResponse.success(profile));
     }
 

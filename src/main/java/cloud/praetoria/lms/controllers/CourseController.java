@@ -47,7 +47,7 @@ public class CourseController {
                     .body(ApiResponse.error("Utilisateur non authentifié"));
         }
         
-        log.debug("✅ Récupération des cours pour: {}", userDetails.getEmail());
+        log.debug("Recuperation des cours pour: {}", userDetails.getEmail());
         List<CourseResponse> courses = courseService.getAllCourses(userDetails.getId());
         return ResponseEntity.ok(ApiResponse.success(courses));
     }

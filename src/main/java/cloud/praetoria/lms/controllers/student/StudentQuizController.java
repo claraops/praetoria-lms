@@ -10,6 +10,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import cloud.praetoria.lms.dtos.ApiResponse;
+import cloud.praetoria.lms.dtos.QuizSubmissionRequest;
 import cloud.praetoria.lms.dtos.QuizSummaryDTO;
 import cloud.praetoria.lms.dtos.StudentSubmitRequest;
 import cloud.praetoria.lms.services.student.StudentQuizService;
@@ -35,8 +36,9 @@ public class StudentQuizController {
     @Operation(summary = "Soumettre les réponses d'un quiz")
     public ResponseEntity<ApiResponse<Void>> submitQuiz(
             @PathVariable Long quizId,
-            @Valid @RequestBody StudentSubmitRequest request) {
-        studentQuizService.submitQuiz(quizId, request.getScore());
-        return ResponseEntity.ok(ApiResponse.successVoid("Quiz soumis avec succès"));
+            @Valid @RequestBody QuizSubmissionRequest request) {
+        int score = studentQuizService.calculateAndSubmitQuiz(quizId, request.getAnswers());
+        return ResponseEntity.ok(ApiResponse.successVoid("Quiz soumis avec succès. Score: " + score));
     }
+   
 }

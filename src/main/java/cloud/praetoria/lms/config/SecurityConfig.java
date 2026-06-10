@@ -1,6 +1,5 @@
 package cloud.praetoria.lms.config;
 
-import org.springframework.context.annotation.Lazy;  
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -14,17 +13,17 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.access.intercept.AuthorizationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import cloud.praetoria.lms.exceptions.JwtAuthenticationEntryPoint;
-import cloud.praetoria.lms.repositories.UserRepository;
 import cloud.praetoria.lms.security.CustomUserDetailsService;
 import cloud.praetoria.lms.security.JwtAccessDeniedHandler;
 import cloud.praetoria.lms.security.JwtAuthenticationFilter;
 import cloud.praetoria.lms.security.JwtTokenProvider;
+import cloud.praetoria.lms.repositories.UserRepository;
 
 import java.util.Arrays;
 
@@ -33,18 +32,15 @@ import java.util.Arrays;
 @EnableMethodSecurity(prePostEnabled = true)
 public class SecurityConfig {
 
-    private final UserDetailsService userDetailsService;
     private final JwtTokenProvider tokenProvider;
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
     private final JwtAccessDeniedHandler jwtAccessDeniedHandler;
     private final UserRepository userRepository;
 
-    public SecurityConfig(@Lazy UserDetailsService userDetailsService,
-                          JwtTokenProvider tokenProvider,
+    public SecurityConfig(JwtTokenProvider tokenProvider,
                           JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint,
                           JwtAccessDeniedHandler jwtAccessDeniedHandler,
                           UserRepository userRepository) {
-        this.userDetailsService = userDetailsService;
         this.tokenProvider = tokenProvider;
         this.jwtAuthenticationEntryPoint = jwtAuthenticationEntryPoint;
         this.jwtAccessDeniedHandler = jwtAccessDeniedHandler;
@@ -57,15 +53,15 @@ public class SecurityConfig {
     }
 
     @Bean
-    public DaoAuthenticationProvider authenticationProvider() {
-        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider(userDetailsService);
-        authProvider.setPasswordEncoder(passwordEncoder());
-        return authProvider;
+    public UserDetailsService userDetailsService() {
+        return new CustomUserDetailsService(userRepository);
     }
 
     @Bean
-    public UserDetailsService userDetailsService() {
-        return new CustomUserDetailsService(userRepository);
+    public DaoAuthenticationProvider authenticationProvider(UserDetailsService userDetailsService) {
+        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider(userDetailsService);
+        authProvider.setPasswordEncoder(passwordEncoder());
+        return authProvider;
     }
 
     @Bean
@@ -74,7 +70,7 @@ public class SecurityConfig {
     }
 
     @Bean
-    public JwtAuthenticationFilter jwtAuthenticationFilter() {
+    public JwtAuthenticationFilter jwtAuthenticationFilter(UserDetailsService userDetailsService) {
         return new JwtAuthenticationFilter(tokenProvider, userDetailsService);
     }
 
@@ -97,32 +93,39 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http,
+                                           UserDetailsService userDetailsService,
+                                           JwtAuthenticationFilter jwtAuthenticationFilter) throws Exception {
         http
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .csrf(csrf -> csrf.disable())
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .authenticationProvider(authenticationProvider())
-            .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
+            .authenticationProvider(authenticationProvider(userDetailsService))
+            .addFilterBefore(jwtAuthenticationFilter, AuthorizationFilter.class)
             .authorizeHttpRequests(authz -> authz
-                .requestMatchers("/auth/login").permitAll()
-                .requestMatchers("/auth/register").permitAll()
-                .requestMatchers("/auth/refresh-token").permitAll()
-                .requestMatchers("/auth/request-password-reset").permitAll()
-                .requestMatchers("/auth/reset-password").permitAll()
+                .requestMatchers("/auth/login", "/auth/register", "/auth/refresh-token",
+                                 "/auth/request-password-reset", "/auth/reset-password").permitAll()
                 .requestMatchers("/auth/logout").authenticated()
-                .requestMatchers("/swagger-ui/**").permitAll()
-                .requestMatchers("/v3/api-docs/**").permitAll()
-                .requestMatchers("/swagger-ui.html").permitAll()
+                .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
                 .requestMatchers("/h2-console/**").permitAll()
-                .requestMatchers("/api/blocks/**").hasAnyRole("STUDENT", "TEACHER", "ADMIN")
-                .requestMatchers("/api/courses/**").hasAnyRole("STUDENT", "TEACHER", "ADMIN")
-                .requestMatchers("/api/exercises/**").hasAnyRole("STUDENT", "TEACHER", "ADMIN")
-                .requestMatchers("/api/modules/**").hasAnyRole("STUDENT", "TEACHER", "ADMIN")
+                .requestMatchers("/api/student/**").hasAnyRole("STUDENT", "TEACHER", "ADMIN")
+                .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/blocks/**").hasAnyRole("STUDENT", "TEACHER", "ADMIN")
+                .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/courses/**").hasAnyRole("STUDENT", "TEACHER", "ADMIN")
+                .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/exercises/**").hasAnyRole("STUDENT", "TEACHER", "ADMIN")
+                .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/modules/**").hasAnyRole("STUDENT", "TEACHER", "ADMIN")
+                .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/quizzes/**").hasAnyRole("STUDENT", "TEACHER", "ADMIN")
+                .requestMatchers("/api/blocks/**").hasAnyRole("TEACHER", "ADMIN")
+                .requestMatchers("/api/courses/**").hasAnyRole("TEACHER", "ADMIN")
+                .requestMatchers("/api/exercises/**").hasAnyRole("TEACHER", "ADMIN")
+                .requestMatchers("/api/modules/**").hasAnyRole("TEACHER", "ADMIN")
+                .requestMatchers("/api/quizzes/**").hasAnyRole("TEACHER", "ADMIN")
+                .requestMatchers("/api/progress/**").hasAnyRole("STUDENT", "TEACHER", "ADMIN")
+                .requestMatchers("/api/gamification/**").hasAnyRole("STUDENT", "TEACHER", "ADMIN")
                 .requestMatchers("/api/profile/**").authenticated()
+                .requestMatchers("/api/teacher/**").hasAnyRole("TEACHER", "ADMIN")
                 .requestMatchers("/api/promos/**").hasAnyRole("TEACHER", "ADMIN")
-                .requestMatchers("/api/quizzes/**").hasAnyRole("STUDENT", "TEACHER", "ADMIN")
                 .requestMatchers("/api/users/**").hasAnyRole("TEACHER", "ADMIN")
+                .requestMatchers("/admin/**").hasRole("ADMIN")
                 .anyRequest().authenticated()
             )
             .exceptionHandling(exception -> exception

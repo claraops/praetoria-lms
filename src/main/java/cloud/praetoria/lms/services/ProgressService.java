@@ -9,7 +9,6 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-//import cloud.praetoria.lms.dtos.CourseProgressDTO;
 import cloud.praetoria.lms.dtos.ModuleProgressDTO;
 import cloud.praetoria.lms.dtos.OverallProgressDTO;
 import cloud.praetoria.lms.entities.Block;
@@ -55,7 +54,8 @@ public class ProgressService {
     
     private static final int XP_PER_COURSE_COMPLETION = 10;
     private static final int XP_PER_MODULE_COMPLETION = 50;
-    
+    private static final int XP_PER_QUIZ_COMPLETION = 20;
+    private static final int XP_BONUS_PERFECT_SCORE = 10;
 
     @Transactional
     public UserCourseProgress startCourse(Long userId, Long courseId) {
@@ -91,12 +91,9 @@ public class ProgressService {
             progress.setCompleted(true);
             progress.setCompletedAt(LocalDateTime.now());
 
-            user.setXp(user.getXp() + XP_PER_COURSE_COMPLETION);
-            gamificationService.addXp(user, XP_PER_COURSE_COMPLETION); 
+            gamificationService.addXp(user, XP_PER_COURSE_COMPLETION);
 
-            	userRepository.save(user);
-            
-            log.info("User {} completed course {} (+{} XP)", 
+            log.info("User {} completed course {} (+{} XP)",
                     user.getEmail(), course.getName(), XP_PER_COURSE_COMPLETION);
 
             checkAndAwardModuleBonus(user, course.getModule());
@@ -104,6 +101,7 @@ public class ProgressService {
         
         return userCourseProgressRepository.save(progress);
     }
+    
     
     @Transactional
     public UserExerciseProgress completeExercise(Long userId, Long exerciseId, Integer score) {
@@ -129,10 +127,10 @@ public class ProgressService {
                 progress.setStartedAt(LocalDateTime.now());
             }
             
-            log.info("User {} completed exercise {} (score: {})", 
+            log.info("User {} completed exercise {} (score: {})",
                     user.getEmail(), exercise.getName(), score);
-            
-                        checkAndAwardModuleBonus(user, exercise.getModule());
+
+            checkAndAwardModuleBonus(user, exercise.getModule());
         }
         
         return userExerciseProgressRepository.save(progress);
@@ -162,9 +160,15 @@ public class ProgressService {
                 progress.setStartedAt(LocalDateTime.now());
             }
             
-            log.info("User {} completed quiz {} (score: {}, attempts: {})", 
+            log.info("User {} completed quiz {} (score: {}, attempts: {})",
                     user.getEmail(), quiz.getName(), score, progress.getAttempts());
-            
+
+            gamificationService.addXp(user, XP_PER_QUIZ_COMPLETION);
+
+            if (score != null && score == 100) {
+                gamificationService.addXp(user, XP_BONUS_PERFECT_SCORE);
+                log.info("Perfect score! +{} XP bonus", XP_BONUS_PERFECT_SCORE);
+            }
             
             Module module = getModuleByQuiz(quiz);
             if (module != null) {
@@ -174,15 +178,15 @@ public class ProgressService {
         
         return userQuizProgressRepository.save(progress);
     }
+    
+    
 
     private void checkAndAwardModuleBonus(User user, Module module) {
         if (module == null) return;
-        
+
         if (isModuleCompleted(user, module)) {
-            user.setXp(user.getXp() + XP_PER_MODULE_COMPLETION);
-            userRepository.save(user);
-            
-            log.info("bravo !  User {} completed module {} (+{} XP bonus)", 
+            gamificationService.addXp(user, XP_PER_MODULE_COMPLETION);
+            log.info("User {} completed module {} (+{} XP bonus)",
                     user.getEmail(), module.getName(), XP_PER_MODULE_COMPLETION);
         }
     }
@@ -407,6 +411,6 @@ public class ProgressService {
                 }
             }
         }
-        return "All completed! Great job! felications ...";
+        return "All completed!";
     }
 }

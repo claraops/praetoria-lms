@@ -1,5 +1,6 @@
 package cloud.praetoria.lms.services;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -17,8 +18,19 @@ import jakarta.mail.internet.MimeMessage;
 public class EmailService {
     
     private final JavaMailSender mailSender;
-    private static final String FROM_EMAIL = "on verra ici pour l'adresse mail plus tard";
-    private static final String RESET_PASSWORD_URL = "pareil pour l'url";
+   
+    @Value("${app.mail.from:no-reply@praetoria.com}")
+    private String fromEmail;
+    
+    @Value("${app.frontend.url:http://localhost:3000}")
+    private String frontendUrl;
+    
+    /**
+     * Construit l'URL complète de réinitialisation
+     */
+    private String getResetPasswordUrl() {
+        return frontendUrl + "/reset-password";
+    }
     
     /**
      * Envoyer email de réinitialisation du mot de passe
@@ -30,10 +42,10 @@ public class EmailService {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
             
-            String resetLink = RESET_PASSWORD_URL + "?token=" + token;
+            String resetLink = getResetPasswordUrl() + "?token=" + token;
             
             helper.setTo(user.getEmail());
-            helper.setFrom(FROM_EMAIL);
+            helper.setFrom(fromEmail);
             helper.setSubject("Définir votre mot de passe Praetoria");
             
             String htmlContent = buildPasswordResetEmailHtml(user, resetLink);
@@ -57,7 +69,7 @@ public class EmailService {
         try {
             SimpleMailMessage message = new SimpleMailMessage();
             message.setTo(user.getEmail());
-            message.setFrom(FROM_EMAIL);
+            message.setFrom(fromEmail);
             message.setSubject("Mot de passe réinitialisé");
             message.setText(
                 "Bonjour " + user.getFirstName() + ",\n\n" +
@@ -116,5 +128,4 @@ public class EmailService {
             </html>
             """.formatted(user.getFirstName(), resetLink);
     }
-    
 }

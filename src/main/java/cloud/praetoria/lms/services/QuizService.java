@@ -49,12 +49,4 @@ public interface QuizService {
      */
     void deleteQuiz(Long id);
 
-    /**
-     * Bascule l'état complété/non complété d'un quiz pour un utilisateur donné.
-     *
-     * @param quizId l'identifiant du quiz
-     * @param userId l'identifiant de l'utilisateur courant
-     * @return le quiz avec le nouvel état de complétion
-     */
-    QuizResponse toggleCompleted(Long quizId, Long userId);
 }

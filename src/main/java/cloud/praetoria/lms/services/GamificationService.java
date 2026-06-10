@@ -13,15 +13,18 @@ import cloud.praetoria.lms.entities.Badge;
 import cloud.praetoria.lms.entities.Block;
 import cloud.praetoria.lms.entities.User;
 import cloud.praetoria.lms.entities.UserBadge;
+import cloud.praetoria.lms.entities.UserExerciseProgress;
 import cloud.praetoria.lms.entities.UserGamification;
 import cloud.praetoria.lms.repositories.BadgeRepository;
 import cloud.praetoria.lms.repositories.CourseRepository;
 import cloud.praetoria.lms.repositories.ModuleRepository;
 import cloud.praetoria.lms.repositories.UserBadgeRepository;
 import cloud.praetoria.lms.repositories.UserCourseProgressRepository;
+import cloud.praetoria.lms.repositories.UserExerciseProgressRepository;
 import cloud.praetoria.lms.repositories.UserGamificationRepository;
 import cloud.praetoria.lms.repositories.UserQuizProgressRepository;
 import cloud.praetoria.lms.repositories.UserRepository;
+import cloud.praetoria.lms.entities.Module;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -45,6 +48,7 @@ public class GamificationService {
     private final UserQuizProgressRepository userQuizProgressRepository;
     private final CourseRepository courseRepository;
     private final ModuleRepository moduleRepository;
+    private final UserExerciseProgressRepository userExerciseProgressRepository;
     
     private static final int XP_PER_COURSE_COMPLETION = 10;
     private static final int XP_PER_MODULE_COMPLETION = 50;
@@ -65,7 +69,7 @@ public class GamificationService {
                     .longestStreak(0)
                     .build();
             userGamificationRepository.save(gamification);
-            log.info(" Gamification initialisée pour l'utilisateur: {}", user.getEmail());
+            log.info("Gamification initialized for user: {}", user.getEmail());
         }
     }
 
@@ -85,7 +89,7 @@ public class GamificationService {
         gamification.addXp(xpAmount);
         userGamificationRepository.save(gamification);
         
-        log.info("les +{} XP pour {} (Total: {} XP, Niveau: {})", 
+        log.info("+{} XP for {} (Total: {} XP, Level: {})",
                 xpAmount, user.getEmail(), gamification.getTotalXp(), gamification.getLevel());
  
         checkAndAwardBadges(user);
@@ -116,8 +120,8 @@ public class GamificationService {
         }
 
         if (!awardedBadges.isEmpty()) {
-            log.info(" Nouveaux badges pour {} : {}", 
-                    user.getEmail(), 
+            log.info("New badges for {} : {}",
+                    user.getEmail(),
                     awardedBadges.stream().map(Badge::getDisplayName).collect(Collectors.joining(", ")));
         }
     }
@@ -145,29 +149,30 @@ public class GamificationService {
 			    return userCourseProgressRepository.countByUserAndCompletedTrue(user) > 0;
 			}
 			
-			private boolean hasCompletedModule(User user) {
-			   /* // Parcourir tous les blocs assignés à l'utilisateur
-			    List<Block> userBlocks = user.getBlocks();
-			    for (Block block : userBlocks) {
-			        for (Module module : block.getModules()) {
-			            // Vérifier si le module est complété
-			            boolean allCoursesCompleted = module.getCourses().stream()
-			                .allMatch(course -> userCourseProgressRepository
-			                    .existsByUserAndCourseAndCompletedTrue(user, course));
-			            boolean allExercisesCompleted = module.getExercises().stream()
-			                .allMatch(exercise -> userExerciseProgressRepository
-			                    .findByUserAndExercise(user, exercise)
-			                    .map(UserExerciseProgress::getCompleted).orElse(false));
-			            boolean quizCompleted = module.getQuiz() == null || 
-			                userQuizProgressRepository.existsByUserAndQuizAndCompletedTrue(user, module.getQuiz());
-			            
-			            if (allCoursesCompleted && allExercisesCompleted && quizCompleted) {
-			                return true;
-			            }
-			        }
-			    }*/
-			    return false;
-			}
+   private boolean hasCompletedModule(User user) {
+        // Parcourir tous les blocs assignés à l'utilisateur
+        List<Block> userBlocks = user.getBlocks();
+        for (Block block : userBlocks) {
+            for (Module module : block.getModules()) {
+                boolean allCoursesCompleted = module.getCourses().stream()
+                    .allMatch(course -> userCourseProgressRepository
+                        .existsByUserAndCourseAndCompletedTrue(user, course));
+                
+                boolean allExercisesCompleted = module.getExercises().stream()
+                    .allMatch(exercise -> userExerciseProgressRepository
+                        .findByUserAndExercise(user, exercise)
+                        .map(UserExerciseProgress::getCompleted).orElse(false));
+                
+                boolean quizCompleted = module.getQuiz() == null || 
+                    userQuizProgressRepository.existsByUserAndQuizAndCompletedTrue(user, module.getQuiz());
+                
+                if (allCoursesCompleted && allExercisesCompleted && quizCompleted) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
 			
 			
 			private boolean hasCompletedTenQuizzes(User user) {
@@ -190,7 +195,7 @@ public class GamificationService {
                 .build();
         userBadgeRepository.save(userBadge);
 
-        log.info("Badge débloqué: {} pour {}", badge.getDisplayName(), user.getEmail());
+        log.info("Badge unlocked: {} for {}", badge.getDisplayName(), user.getEmail());
     }
 
     /**

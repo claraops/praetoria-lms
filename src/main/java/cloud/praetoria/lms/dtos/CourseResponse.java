@@ -18,7 +18,6 @@ public class CourseResponse {
     private String description;
     private String videoUrl;
     private String content;
-    private Boolean completed;
     private Long moduleId;
     private String moduleName;
     private LocalDateTime createdAt;
@@ -31,21 +30,6 @@ public class CourseResponse {
                 .description(course.getDescription())
                 .videoUrl(course.getVideoUrl())
                 .content(course.getContent())
-                .moduleId(course.getModule() != null ? course.getModule().getId() : null)
-                .moduleName(course.getModule() != null ? course.getModule().getName() : null)
-                .createdAt(course.getCreatedAt())
-                .updatedAt(course.getUpdatedAt())
-                .build();
-    }
-
-    public static CourseResponse fromEntity(Course course, boolean completed) {
-        return builder()
-                .id(course.getId())
-                .name(course.getName())
-                .description(course.getDescription())
-                .videoUrl(course.getVideoUrl())
-                .content(course.getContent())
-                .completed(completed)
                 .moduleId(course.getModule() != null ? course.getModule().getId() : null)
                 .moduleName(course.getModule() != null ? course.getModule().getName() : null)
                 .createdAt(course.getCreatedAt())

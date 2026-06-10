@@ -3,12 +3,9 @@ package cloud.praetoria.lms.services;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import org.springframework.context.annotation.Lazy;   // ← Import Spring
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -45,7 +42,6 @@ public class AuthService {
     private final JwtTokenProvider jwtTokenProvider;
     private final GamificationService gamificationService;
 
-    // Constructeur avec @Lazy sur GamificationService (plus RefreshTokenService)
     public AuthService(UserRepository userRepository,
                        RoleRepository roleRepository,
                        OrganizationRepository organizationRepository,
@@ -64,17 +60,6 @@ public class AuthService {
         this.gamificationService = gamificationService;
     }
 
-    // Récupérer l'utilisateur courant
-    public User getCurrentUser() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null || !authentication.isAuthenticated()) {
-            throw new AuthenticationException("Utilisateur non authentifié");
-        }
-        String email = ((UserDetails) authentication.getPrincipal()).getUsername();
-        return userRepository.findByEmail(email)
-                .orElseThrow(() -> new ResourceNotFoundException("Utilisateur non trouvé"));
-    }
-
     @Transactional
     public void registerUser(RegisterRequest request) {
         log.info("Inscription d'un nouvel utilisateur: {}", request.getEmail());
@@ -83,7 +68,6 @@ public class AuthService {
             throw new AuthenticationException("Les mots de passe ne correspondent pas");
         }
 
-        // Vérifier la clé d'inscription
         Organization organization = organizationRepository
             .findByRegistrationKey(request.getRegistrationKey())
             .orElseThrow(() -> {
@@ -91,13 +75,11 @@ public class AuthService {
                 return new AuthenticationException("Clé d'inscription invalide");
             });
 
-        // Vérifier que l'organisation est active et la licence valide
         if (!organization.isLicenseValid()) {
             log.warn("Organisation inactive ou licence expirée: {}", organization.getName());
             throw new AuthenticationException("Cette organisation n'est plus active");
         }
 
-        // Vérifier le quota d'étudiants
         if (organization.getMaxStudents() != null) {
             long currentCount = organizationRepository.countActiveStudents(organization);
             if (currentCount >= organization.getMaxStudents()) {
@@ -106,7 +88,6 @@ public class AuthService {
             }
         }
 
-        // Vérifier que l'email n'est pas déjà utilisé
         if (userRepository.existsByEmail(request.getEmail())) {
             log.warn("Email déjà utilisé: {}", request.getEmail());
             throw new AuthenticationException("Cet email est déjà utilisé");
@@ -127,7 +108,6 @@ public class AuthService {
             .build();
 
         user = userRepository.save(user);
-        // Appel à la gamification (avec @Lazy, ok)
         gamificationService.initializeGamification(user);
 
         log.info("Utilisateur créé avec succès: {} dans l'organisation: {}", 

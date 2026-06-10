@@ -38,38 +38,25 @@ public class TeacherController {
     private final UserRepository userRepository;
     private final ProgressService progressService;
 
-    /**
-     * Récupère tous les modules gérés par l'enseignant connecté
-     * Note: Adaptez selon votre logique d'association Teacher-Module
-     */
     @GetMapping("/modules")
     @Operation(summary = "Modules gérés par l'enseignant connecté")
-    public ResponseEntity<ApiResponse<List<ModuleResponse>>> getTeacherModules() {  // ← ModuleResponse au lieu de Module
+    public ResponseEntity<ApiResponse<List<ModuleResponse>>> getTeacherModules() {
         User teacher = currentUserService.getCurrentUser();
-        
-        // TODO: Filtrer par enseignant selon votre modèle
         List<Module> modules = moduleRepository.findAll();
-        
-        // Convertir Module → ModuleResponse
         List<ModuleResponse> moduleResponses = modules.stream()
                 .map(this::convertToModuleResponse)
                 .collect(Collectors.toList());
-        
         return ResponseEntity.ok(ApiResponse.success(moduleResponses));
     }
 
-    /**
-     * Liste les étudiants d'un module avec leur progression
-     */
     @GetMapping("/modules/{moduleId}/students")
     @Operation(summary = "Liste des étudiants d'un module avec progression")
     public ResponseEntity<ApiResponse<List<StudentProgressSummaryDTO>>> getModuleStudents(@PathVariable Long moduleId) {
         Module module = moduleRepository.findById(moduleId)
                 .orElseThrow(() -> new RuntimeException("Module non trouvé: " + moduleId));
-        
-        // Récupérer les étudiants via l'organisation (alternative)
+
         List<User> students = userRepository.findByBlocksContaining(module.getBlock());
-        
+
         List<StudentProgressSummaryDTO> result = students.stream()
                 .map(student -> {
                     ModuleProgressDTO progress = progressService.getUserProgressForModule(student.getId(), moduleId);
@@ -81,13 +68,10 @@ public class TeacherController {
                             .build();
                 })
                 .collect(Collectors.toList());
-        
+
         return ResponseEntity.ok(ApiResponse.success(result));
     }
 
-    /**
-     * Progression détaillée d'un étudiant spécifique
-     */
     @GetMapping("/students/{studentId}/progress")
     @Operation(summary = "Progression globale d'un étudiant")
     public ResponseEntity<ApiResponse<OverallProgressDTO>> getStudentProgress(@PathVariable Long studentId) {
@@ -95,16 +79,9 @@ public class TeacherController {
         return ResponseEntity.ok(ApiResponse.success(progress));
     }
 
-    /**
-     * Convertit un Module en ModuleResponse
-     */
     private ModuleResponse convertToModuleResponse(Module module) {
-    	 return ModuleResponse.fromEntity(module);
+        return ModuleResponse.fromEntity(module);
     }
-    
-    
-    
-    
 
     @lombok.Data
     @lombok.Builder

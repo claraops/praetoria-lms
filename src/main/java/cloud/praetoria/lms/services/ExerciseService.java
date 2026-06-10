@@ -17,6 +17,4 @@ public interface ExerciseService {
     ExerciseResponse updateExercise(Long id, ExerciseRequest exerciseRequest);
 
     void deleteExercise(Long id);
-
-    ExerciseResponse toggleCompleted(Long exerciseId, Long userId);
 }

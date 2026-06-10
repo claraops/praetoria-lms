@@ -1,6 +1,7 @@
 package cloud.praetoria.lms.dtos;
 
 import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -12,7 +13,13 @@ import lombok.NoArgsConstructor;
 @Builder
 public class UserUpdateRequest {
     @Email private String email;
+    @Size(min = 2, max = 100, message = "Prénom doit être entre 2 et 100 caractères")
     private String firstName;
+
+    @Size(min = 2, max = 100, message = "Nom doit être entre 2 et 100 caractères")
     private String lastName;
+   
     private Boolean isActive;
+    
+    
 }
