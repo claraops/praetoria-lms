@@ -40,7 +40,6 @@ public class StudentCourseService {
         Course course = courseRepository.findById(courseId)
                 .orElseThrow(() -> new RuntimeException("Cours non trouvé: " + courseId));
         
-        // Vérifier si c'est le premier accès
         UserCourseProgress progress = userCourseProgressRepository
                 .findByUserAndCourse(user, course).orElse(null);
         

@@ -36,7 +36,7 @@ public class QuizController {
                     .body(ApiResponse.error("Utilisateur non authentifié"));
         }
         
-        log.debug("✅ Récupération des cours pour: {}", userDetails.getEmail());
+        log.debug("Recuperation des quiz pour: {}", userDetails.getEmail());
     	
     	List<QuizResponse> quizzes = quizService.getAllQuizzes(userDetails.getId());
         return ResponseEntity.ok(ApiResponse.success(quizzes));
@@ -75,12 +75,5 @@ public class QuizController {
         return ResponseEntity.ok(ApiResponse.successVoid("Quiz supprimé avec succès"));
     }
 
-    @PatchMapping("/{id}/completed")
-    @Operation(summary = "Marquer un quiz comme complété ou non complété")
-    public ResponseEntity<ApiResponse<QuizResponse>> toggleCompleted(
-            @PathVariable Long id,
-            @AuthenticationPrincipal UserDetailsImpl userDetails) {
-        QuizResponse quizResponse = quizService.toggleCompleted(id, userDetails.getId());
-        return ResponseEntity.ok(ApiResponse.success(quizResponse, "État du quiz mis à jour"));
-    }
+
 }

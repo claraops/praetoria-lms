@@ -1,0 +1,1049 @@
+{
+  "info": {
+    "name": "Praetoria LMS API",
+    "description": "Collection complète des endpoints Praetoria LMS.\n\n## Configuration\n- Base URL: `{{base_url}}` (défaut: http://localhost:8080)\n- Token: s'authentifie via le endpoint Login, copier le token dans `{{token}}`\n\n## Données de test (initialisées au démarrage)\n- **Admin**: admin@praetoria.cloud / password123 (ROLE_ADMIN)\n- **Teacher**: teacher@praetoria.cloud / password123 (ROLE_TEACHER)\n- **Student**: student@praetoria.cloud / password123 (ROLE_STUDENT)\n\nClé d'inscription disponible dans data.sql: PRE-ABCD1234",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8080",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"registrationKey\": \"PRE-ABCD1234\",\n  \"email\": \"nouveau@praetoria.cloud\",\n  \"firstName\": \"Nouveau\",\n  \"lastName\": \"Etudiant\",\n  \"password\": \"password123\",\n  \"confirmPassword\": \"password123\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/auth/register", "host": ["{{base_url}}"], "path": ["auth", "register"] }
+          }
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@praetoria.cloud\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/auth/login", "host": ["{{base_url}}"], "path": ["auth", "login"] },
+            "event": [
+              {
+                "listen": "test",
+                "script": {
+                  "exec": [
+                    "var jsonData = pm.response.json();",
+                    "pm.collectionVariables.set('token', jsonData.token);",
+                    "pm.collectionVariables.set('refreshToken', jsonData.refreshToken);"
+                  ],
+                  "type": "text/javascript"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "name": "Refresh Token",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/auth/refresh-token", "host": ["{{base_url}}"], "path": ["auth", "refresh-token"] }
+          }
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": { "raw": "{{base_url}}/auth/logout", "host": ["{{base_url}}"], "path": ["auth", "logout"] }
+          }
+        },
+        {
+          "name": "Request Password Reset",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"student@praetoria.cloud\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/auth/request-password-reset", "host": ["{{base_url}}"], "path": ["auth", "request-password-reset"] }
+          }
+        },
+        {
+          "name": "Reset Password",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"TOKEN_RECU_PAR_EMAIL\",\n  \"newPassword\": \"newPassword123\",\n  \"confirmPassword\": \"newPassword123\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/auth/reset-password", "host": ["{{base_url}}"], "path": ["auth", "reset-password"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Profile",
+      "item": [
+        {
+          "name": "Get My Profile",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{base_url}}/api/profile", "host": ["{{base_url}}"], "path": ["api", "profile"] }
+          }
+        },
+        {
+          "name": "Update My Profile",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"nouveau@praetoria.cloud\",\n  \"firstName\": \"NouveauPrenom\",\n  \"lastName\": \"NouveauNom\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/api/profile", "host": ["{{base_url}}"], "path": ["api", "profile"] }
+          }
+        },
+        {
+          "name": "Update My Password",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"currentPassword\": \"password123\",\n  \"newPassword\": \"newPassword123\",\n  \"confirmPassword\": \"newPassword123\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/api/profile/password", "host": ["{{base_url}}"], "path": ["api", "profile", "password"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Admin - Organizations",
+      "item": [
+        {
+          "name": "Create Organization",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Nouvelle Ecole\",\n  \"contactEmail\": \"contact@nouvelle-ecole.com\",\n  \"maxStudents\": 500,\n  \"licenseExpiresAt\": \"2027-12-31T23:59:59\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/admin/organizations", "host": ["{{base_url}}"], "path": ["admin", "organizations"] }
+          }
+        },
+        {
+          "name": "Get All Organizations",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{base_url}}/admin/organizations", "host": ["{{base_url}}"], "path": ["admin", "organizations"] }
+          }
+        },
+        {
+          "name": "Get Organization By ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{base_url}}/admin/organizations/1", "host": ["{{base_url}}"], "path": ["admin", "organizations", "1"] }
+          }
+        },
+        {
+          "name": "Update Organization",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Ecole Mise a Jour\",\n  \"contactEmail\": \"update@ecole.com\",\n  \"maxStudents\": 1000,\n  \"licenseExpiresAt\": \"2028-12-31T23:59:59\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/admin/organizations/1", "host": ["{{base_url}}"], "path": ["admin", "organizations", "1"] }
+          }
+        },
+        {
+          "name": "Regenerate Key",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": { "raw": "{{base_url}}/admin/organizations/1/regenerate-key", "host": ["{{base_url}}"], "path": ["admin", "organizations", "1", "regenerate-key"] }
+          }
+        },
+        {
+          "name": "Toggle Active",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": { "raw": "{{base_url}}/admin/organizations/1/toggle-active", "host": ["{{base_url}}"], "path": ["admin", "organizations", "1", "toggle-active"] }
+          }
+        },
+        {
+          "name": "Delete Organization",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": { "raw": "{{base_url}}/admin/organizations/1", "host": ["{{base_url}}"], "path": ["admin", "organizations", "1"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Admin - Users",
+      "item": [
+        {
+          "name": "Get All Users",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{base_url}}/admin/users", "host": ["{{base_url}}"], "path": ["admin", "users"] }
+          }
+        },
+        {
+          "name": "Get Users By Organization",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{base_url}}/admin/users?organizationId=1", "host": ["{{base_url}}"], "path": ["admin", "users"], "query": [{ "key": "organizationId", "value": "1" }] }
+          }
+        },
+        {
+          "name": "Toggle User Active",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": { "raw": "{{base_url}}/admin/users/1/toggle-active", "host": ["{{base_url}}"], "path": ["admin", "users", "1", "toggle-active"] }
+          }
+        },
+        {
+          "name": "Unlock User",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": { "raw": "{{base_url}}/admin/users/1/unlock", "host": ["{{base_url}}"], "path": ["admin", "users", "1", "unlock"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": " Admin - Stats",
+      "item": [
+        {
+          "name": "Get Global Stats",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{base_url}}/admin/stats/global", "host": ["{{base_url}}"], "path": ["admin", "stats", "global"] }
+          }
+        },
+        {
+          "name": "Get Organization Stats",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{base_url}}/admin/stats/organizations/1", "host": ["{{base_url}}"], "path": ["admin", "stats", "organizations", "1"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Blocks",
+      "item": [
+        {
+          "name": "Get All Blocks",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{base_url}}/api/blocks", "host": ["{{base_url}}"], "path": ["api", "blocks"] }
+          }
+        },
+        {
+          "name": "Get Block By ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{base_url}}/api/blocks/1", "host": ["{{base_url}}"], "path": ["api", "blocks", "1"] }
+          }
+        },
+        {
+          "name": "Create Block",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Nouveau Bloc\",\n  \"description\": \"Description du nouveau bloc\",\n  \"cover\": \"cover-url.jpg\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/api/blocks", "host": ["{{base_url}}"], "path": ["api", "blocks"] }
+          }
+        },
+        {
+          "name": "Update Block",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Bloc Modifie\",\n  \"description\": \"Description modifiee\",\n  \"cover\": \"new-cover.jpg\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/api/blocks/1", "host": ["{{base_url}}"], "path": ["api", "blocks", "1"] }
+          }
+        },
+        {
+          "name": "Delete Block",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": { "raw": "{{base_url}}/api/blocks/1", "host": ["{{base_url}}"], "path": ["api", "blocks", "1"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Modules",
+      "item": [
+        {
+          "name": "Get All Modules",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{base_url}}/api/modules", "host": ["{{base_url}}"], "path": ["api", "modules"] }
+          }
+        },
+        {
+          "name": "Get Module By ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{base_url}}/api/modules/1", "host": ["{{base_url}}"], "path": ["api", "modules", "1"] }
+          }
+        },
+        {
+          "name": "Get Modules By Block ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{base_url}}/api/modules/block/1", "host": ["{{base_url}}"], "path": ["api", "modules", "block", "1"] }
+          }
+        },
+        {
+          "name": "Create Module",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Nouveau Module\",\n  \"description\": \"Description du module\",\n  \"blockId\": 1\n}"
+            },
+            "url": { "raw": "{{base_url}}/api/modules", "host": ["{{base_url}}"], "path": ["api", "modules"] }
+          }
+        },
+        {
+          "name": "Update Module",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Module Modifie\",\n  \"description\": \"Description modifiee\",\n  \"blockId\": 1\n}"
+            },
+            "url": { "raw": "{{base_url}}/api/modules/1", "host": ["{{base_url}}"], "path": ["api", "modules", "1"] }
+          }
+        },
+        {
+          "name": "Delete Module",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": { "raw": "{{base_url}}/api/modules/1", "host": ["{{base_url}}"], "path": ["api", "modules", "1"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Courses",
+      "item": [
+        {
+          "name": "Get All Courses",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{base_url}}/api/courses", "host": ["{{base_url}}"], "path": ["api", "courses"] }
+          }
+        },
+        {
+          "name": "Get Course By ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{base_url}}/api/courses/1", "host": ["{{base_url}}"], "path": ["api", "courses", "1"] }
+          }
+        },
+        {
+          "name": "Get Courses By Module ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{base_url}}/api/courses/module/1", "host": ["{{base_url}}"], "path": ["api", "courses", "module", "1"] }
+          }
+        },
+        {
+          "name": "Create Course",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Nouveau Cours\",\n  \"description\": \"Description du cours\",\n  \"videoUrl\": \"https://example.com/video.mp4\",\n  \"content\": \"Contenu du cours en markdown...\",\n  \"moduleId\": 1\n}"
+            },
+            "url": { "raw": "{{base_url}}/api/courses", "host": ["{{base_url}}"], "path": ["api", "courses"] }
+          }
+        },
+        {
+          "name": "Update Course",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Cours Modifie\",\n  \"description\": \"Description modifiee\",\n  \"videoUrl\": \"https://example.com/new-video.mp4\",\n  \"content\": \"Contenu mis a jour...\",\n  \"moduleId\": 1\n}"
+            },
+            "url": { "raw": "{{base_url}}/api/courses/1", "host": ["{{base_url}}"], "path": ["api", "courses", "1"] }
+          }
+        },
+        {
+          "name": "Delete Course",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": { "raw": "{{base_url}}/api/courses/1", "host": ["{{base_url}}"], "path": ["api", "courses", "1"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Exercises",
+      "item": [
+        {
+          "name": "Get All Exercises",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{base_url}}/api/exercises", "host": ["{{base_url}}"], "path": ["api", "exercises"] }
+          }
+        },
+        {
+          "name": "Get Exercise By ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{base_url}}/api/exercises/1", "host": ["{{base_url}}"], "path": ["api", "exercises", "1"] }
+          }
+        },
+        {
+          "name": "Get Exercises By Module ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{base_url}}/api/exercises/module/1", "host": ["{{base_url}}"], "path": ["api", "exercises", "module", "1"] }
+          }
+        },
+        {
+          "name": "Create Exercise",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Nouvel Exercice\",\n  \"content\": \"Contenu de l'exercice...\",\n  \"moduleId\": 1\n}"
+            },
+            "url": { "raw": "{{base_url}}/api/exercises", "host": ["{{base_url}}"], "path": ["api", "exercises"] }
+          }
+        },
+        {
+          "name": "Update Exercise",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Exercice Modifie\",\n  \"content\": \"Contenu modifie...\",\n  \"moduleId\": 1\n}"
+            },
+            "url": { "raw": "{{base_url}}/api/exercises/1", "host": ["{{base_url}}"], "path": ["api", "exercises", "1"] }
+          }
+        },
+        {
+          "name": "Delete Exercise",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": { "raw": "{{base_url}}/api/exercises/1", "host": ["{{base_url}}"], "path": ["api", "exercises", "1"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Quizzes",
+      "item": [
+        {
+          "name": "Get All Quizzes",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{base_url}}/api/quizzes", "host": ["{{base_url}}"], "path": ["api", "quizzes"] }
+          }
+        },
+        {
+          "name": "Get Quiz By ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{base_url}}/api/quizzes/1", "host": ["{{base_url}}"], "path": ["api", "quizzes", "1"] }
+          }
+        },
+        {
+          "name": "Create Quiz",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Nouveau Quiz\",\n  \"content\": \"Contenu du quiz...\",\n  \"moduleId\": 1\n}"
+            },
+            "url": { "raw": "{{base_url}}/api/quizzes", "host": ["{{base_url}}"], "path": ["api", "quizzes"] }
+          }
+        },
+        {
+          "name": "Update Quiz",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Quiz Modifie\",\n  \"content\": \"Contenu modifie...\",\n  \"moduleId\": 1\n}"
+            },
+            "url": { "raw": "{{base_url}}/api/quizzes/1", "host": ["{{base_url}}"], "path": ["api", "quizzes", "1"] }
+          }
+        },
+        {
+          "name": "Delete Quiz",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": { "raw": "{{base_url}}/api/quizzes/1", "host": ["{{base_url}}"], "path": ["api", "quizzes", "1"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Users",
+      "item": [
+        {
+          "name": "Get All Users",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{base_url}}/api/users", "host": ["{{base_url}}"], "path": ["api", "users"] }
+          }
+        },
+        {
+          "name": "Get Users By Promotion",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{base_url}}/api/users/promotion/1", "host": ["{{base_url}}"], "path": ["api", "users", "promotion", "1"] }
+          }
+        },
+        {
+          "name": "Get User By ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{base_url}}/api/users/1", "host": ["{{base_url}}"], "path": ["api", "users", "1"] }
+          }
+        },
+        {
+          "name": "Update User",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"updated@praetoria.cloud\",\n  \"firstName\": \"Updated\",\n  \"lastName\": \"User\",\n  \"isActive\": true\n}"
+            },
+            "url": { "raw": "{{base_url}}/api/users/1", "host": ["{{base_url}}"], "path": ["api", "users", "1"] }
+          }
+        },
+        {
+          "name": "Update Role",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"roleName\": \"ROLE_TEACHER\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/api/users/1/role", "host": ["{{base_url}}"], "path": ["api", "users", "1", "role"] }
+          }
+        },
+        {
+          "name": "Toggle Enabled",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": { "raw": "{{base_url}}/api/users/1/enabled", "host": ["{{base_url}}"], "path": ["api", "users", "1", "enabled"] }
+          }
+        },
+        {
+          "name": "Assign Promotion",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": { "raw": "{{base_url}}/api/users/1/promotion/1", "host": ["{{base_url}}"], "path": ["api", "users", "1", "promotion", "1"] }
+          }
+        },
+        {
+          "name": "Remove Promotion",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": { "raw": "{{base_url}}/api/users/1/promotion", "host": ["{{base_url}}"], "path": ["api", "users", "1", "promotion"] }
+          }
+        },
+        {
+          "name": "Assign Blocks",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"blockIds\": [1, 2]\n}"
+            },
+            "url": { "raw": "{{base_url}}/api/users/1/blocks", "host": ["{{base_url}}"], "path": ["api", "users", "1", "blocks"] }
+          }
+        },
+        {
+          "name": "Delete User",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": { "raw": "{{base_url}}/api/users/1", "host": ["{{base_url}}"], "path": ["api", "users", "1"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Gamification",
+      "item": [
+        {
+          "name": "Get My Profile",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{base_url}}/api/gamification/profile", "host": ["{{base_url}}"], "path": ["api", "gamification", "profile"] }
+          }
+        },
+        {
+          "name": "Get User Profile By ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{base_url}}/api/gamification/profile/1", "host": ["{{base_url}}"], "path": ["api", "gamification", "profile", "1"] }
+          }
+        },
+        {
+          "name": "Get Leaderboard",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{base_url}}/api/gamification/leaderboard", "host": ["{{base_url}}"], "path": ["api", "gamification", "leaderboard"] }
+          }
+        },
+        {
+          "name": "Get Leaderboard By Organization",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{base_url}}/api/gamification/leaderboard/organization?organizationId=1", "host": ["{{base_url}}"], "path": ["api", "gamification", "leaderboard", "organization"], "query": [{ "key": "organizationId", "value": "1" }] }
+          }
+        },
+        {
+          "name": "Get My Gamification",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{base_url}}/api/gamification/me", "host": ["{{base_url}}"], "path": ["api", "gamification", "me"] }
+          }
+        },
+        {
+          "name": "Get My Badges",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{base_url}}/api/gamification/my-badges", "host": ["{{base_url}}"], "path": ["api", "gamification", "my-badges"] }
+          }
+        },
+        {
+          "name": "Get My Organization Leaderboard",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{base_url}}/api/gamification/leaderboard/my-organization", "host": ["{{base_url}}"], "path": ["api", "gamification", "leaderboard", "my-organization"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Progress",
+      "item": [
+        {
+          "name": "Get Module Progress",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{base_url}}/api/progress/module/1", "host": ["{{base_url}}"], "path": ["api", "progress", "module", "1"] }
+          }
+        },
+        {
+          "name": "Get Overall Progress",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{base_url}}/api/progress/overall", "host": ["{{base_url}}"], "path": ["api", "progress", "overall"] }
+          }
+        },
+        {
+          "name": "Start Course",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": { "raw": "{{base_url}}/api/progress/course/1/start", "host": ["{{base_url}}"], "path": ["api", "progress", "course", "1", "start"] }
+          }
+        },
+        {
+          "name": "Complete Course",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": { "raw": "{{base_url}}/api/progress/course/1/complete", "host": ["{{base_url}}"], "path": ["api", "progress", "course", "1", "complete"] }
+          }
+        },
+        {
+          "name": "Complete Exercise",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": { "raw": "{{base_url}}/api/progress/exercise/1/complete?score=85", "host": ["{{base_url}}"], "path": ["api", "progress", "exercise", "1", "complete"], "query": [{ "key": "score", "value": "85" }] }
+          }
+        },
+        {
+          "name": "Complete Quiz",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": { "raw": "{{base_url}}/api/progress/quiz/1/complete?score=90", "host": ["{{base_url}}"], "path": ["api", "progress", "quiz", "1", "complete"], "query": [{ "key": "score", "value": "90" }] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Promotions",
+      "item": [
+        {
+          "name": "Get All Promos",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{base_url}}/api/promos", "host": ["{{base_url}}"], "path": ["api", "promos"] }
+          }
+        },
+        {
+          "name": "Get Promo By ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{base_url}}/api/promos/1", "host": ["{{base_url}}"], "path": ["api", "promos", "1"] }
+          }
+        },
+        {
+          "name": "Create Promo",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Promo 2026\",\n  \"startDate\": \"2026-09-01\",\n  \"endDate\": \"2027-06-30\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/api/promos", "host": ["{{base_url}}"], "path": ["api", "promos"] }
+          }
+        },
+        {
+          "name": "Update Promo",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Promo 2026 Modifiee\",\n  \"startDate\": \"2026-09-01\",\n  \"endDate\": \"2027-06-30\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/api/promos/1", "host": ["{{base_url}}"], "path": ["api", "promos", "1"] }
+          }
+        },
+        {
+          "name": "Delete Promo",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": { "raw": "{{base_url}}/api/promos/1", "host": ["{{base_url}}"], "path": ["api", "promos", "1"] }
+          }
+        },
+        {
+          "name": "Toggle Promo Active",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": { "raw": "{{base_url}}/api/promos/1/active", "host": ["{{base_url}}"], "path": ["api", "promos", "1", "active"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Teacher",
+      "item": [
+        {
+          "name": "Get Teacher Modules",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{base_url}}/api/teacher/modules", "host": ["{{base_url}}"], "path": ["api", "teacher", "modules"] }
+          }
+        },
+        {
+          "name": "Get Module Students",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{base_url}}/api/teacher/modules/1/students", "host": ["{{base_url}}"], "path": ["api", "teacher", "modules", "1", "students"] }
+          }
+        },
+        {
+          "name": "Get Student Progress",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{base_url}}/api/teacher/students/1/progress", "host": ["{{base_url}}"], "path": ["api", "teacher", "students", "1", "progress"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Student - Blocks",
+      "item": [
+        {
+          "name": "Get My Blocks",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{base_url}}/api/student/blocks", "host": ["{{base_url}}"], "path": ["api", "student", "blocks"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Student - Modules",
+      "item": [
+        {
+          "name": "Get Modules By Block",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{base_url}}/api/student/blocks/1/modules", "host": ["{{base_url}}"], "path": ["api", "student", "blocks", "1", "modules"] }
+          }
+        },
+        {
+          "name": "Get Module Detail",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{base_url}}/api/student/modules/1", "host": ["{{base_url}}"], "path": ["api", "student", "modules", "1"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Student - Courses",
+      "item": [
+        {
+          "name": "Get Course Content",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{base_url}}/api/student/courses/1", "host": ["{{base_url}}"], "path": ["api", "student", "courses", "1"] }
+          }
+        },
+        {
+          "name": "Complete Course",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": { "raw": "{{base_url}}/api/student/courses/1/complete", "host": ["{{base_url}}"], "path": ["api", "student", "courses", "1", "complete"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": " Student - Exercises",
+      "item": [
+        {
+          "name": "Get Exercise Content",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{base_url}}/api/student/exercises/1", "host": ["{{base_url}}"], "path": ["api", "student", "exercises", "1"] }
+          }
+        },
+        {
+          "name": "Submit Exercise",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"score\": 85\n}"
+            },
+            "url": { "raw": "{{base_url}}/api/student/exercises/1/submit", "host": ["{{base_url}}"], "path": ["api", "student", "exercises", "1", "submit"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Student - Quizzes",
+      "item": [
+        {
+          "name": "Get Quiz Content",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{base_url}}/api/student/quizzes/1", "host": ["{{base_url}}"], "path": ["api", "student", "quizzes", "1"] }
+          }
+        },
+        {
+          "name": "Submit Quiz",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"answers\": {\n    \"1\": \"reponse_a\",\n    \"2\": \"reponse_c\",\n    \"3\": \"reponse_b\"\n  }\n}"
+            },
+            "url": { "raw": "{{base_url}}/api/student/quizzes/1/submit", "host": ["{{base_url}}"], "path": ["api", "student", "quizzes", "1", "submit"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Student - Progress",
+      "item": [
+        {
+          "name": "Get My Overall Progress",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{base_url}}/api/student/progress/me", "host": ["{{base_url}}"], "path": ["api", "student", "progress", "me"] }
+          }
+        },
+        {
+          "name": "Get My Module Progress",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{base_url}}/api/student/progress/me/modules/1", "host": ["{{base_url}}"], "path": ["api", "student", "progress", "me", "modules", "1"] }
+          }
+        }
+      ]
+    }
+  ]
+}

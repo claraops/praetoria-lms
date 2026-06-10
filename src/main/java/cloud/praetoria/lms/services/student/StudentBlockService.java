@@ -57,7 +57,6 @@ public class StudentBlockService {
                 completedModules++;
                 totalPercent += 100.0;
             } else {
-                // Calculer le pourcentage du module non complété
                 var moduleProgress = progressService.getUserProgressForModule(user.getId(), module.getId());
                 totalPercent += moduleProgress.getPercentComplete();
             }

@@ -89,11 +89,4 @@ public class QuizServiceImpl implements QuizService {
         quizRepository.deleteById(id);
     }
 
-    @Override
-    @Transactional
-    public QuizResponse toggleCompleted(Long quizId, Long userId) {
-        Quiz quiz = quizRepository.findById(quizId)
-                .orElseThrow(() -> new ResourceNotFoundException("Quiz non trouvé"));
-        return QuizResponse.fromEntity(quiz);
-    }
 }

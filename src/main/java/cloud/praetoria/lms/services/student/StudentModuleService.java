@@ -63,7 +63,6 @@ public class StudentModuleService {
         boolean isModuleCompleted = progressService.isModuleCompleted(user, module);
         ModuleProgressDTO progress = progressService.getUserProgressForModule(user.getId(), moduleId);
         
-        // Récupérer les cours avec statut
         List<CourseSummaryDTO> courseDTOs = new ArrayList<>();
         for (Course course : module.getCourses()) {
             UserCourseProgress courseProgress = userCourseProgressRepository
@@ -83,7 +82,6 @@ public class StudentModuleService {
                     .build());
         }
         
-        // Récupérer les exercices avec statut
         List<ExerciseSummaryDTO> exerciseDTOs = new ArrayList<>();
         for (Exercise exercise : module.getExercises()) {
             UserExerciseProgress exerciseProgress = userExerciseProgressRepository
@@ -100,7 +98,6 @@ public class StudentModuleService {
                     .build());
         }
         
-        // Récupérer le quiz avec statut
         QuizSummaryDTO quizDTO = null;
         if (module.getQuiz() != null) {
             Quiz quiz = module.getQuiz();

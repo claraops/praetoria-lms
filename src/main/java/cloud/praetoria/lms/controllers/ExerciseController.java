@@ -39,7 +39,7 @@ public class ExerciseController {
                     .body(ApiResponse.error("Utilisateur non authentifié"));
         }
         
-        log.debug("✅ Récupération des cours pour: {}", userDetails.getEmail());
+        log.debug("Recuperation des exercices pour: {}", userDetails.getEmail());
     	List<ExerciseResponse> exercises = exerciseService.getAllExercises(userDetails.getId());
         return ResponseEntity.ok(ApiResponse.success(exercises));
     }

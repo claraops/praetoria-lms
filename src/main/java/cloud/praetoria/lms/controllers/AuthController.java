@@ -4,16 +4,13 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import cloud.praetoria.lms.dtos.*;
 import cloud.praetoria.lms.entities.User;
 import cloud.praetoria.lms.exceptions.ResourceNotFoundException;
-import cloud.praetoria.lms.repositories.UserRepository;
 import cloud.praetoria.lms.services.AuthService;
+import cloud.praetoria.lms.services.CurrentUserService;
 import cloud.praetoria.lms.services.PasswordResetService;
 
 @RestController
@@ -23,27 +20,14 @@ import cloud.praetoria.lms.services.PasswordResetService;
 public class AuthController {
 
     private final AuthService authService;
+    private final CurrentUserService currentUserService;
     private final PasswordResetService passwordResetService;
-    private final UserRepository userRepository;
 
-    /**
-     * Inscrit un nouvel utilisateur.
-     *
-     * @param request les données d'inscription validées
-     * @return les tokens et les informations de l'utilisateur (201 Created)
-     */
     @PostMapping("/register")
     public ResponseEntity<ApiResponse<Void>> register(@Valid @RequestBody RegisterRequest request) {
         authService.registerUser(request);
         return ResponseEntity.ok(ApiResponse.success(null, "Inscription réussie. Vous pouvez vous connecter !"));
     }
-    
-    /**
-     * Connecte un utilisateur existant.
-     *
-     * @param request les identifiants de connexion valides
-     * @return les tokens et les informations de l'utilisateur
-     */
 
     @PostMapping("/login")
     public ResponseEntity<ApiResponse<LoginResponse>> login(@Valid @RequestBody LoginRequest request) {
@@ -51,29 +35,19 @@ public class AuthController {
         return ResponseEntity.ok(ApiResponse.success(response, "Connexion réussie"));
     }
 
- 
     @PostMapping("/refresh-token")
     public ResponseEntity<ApiResponse<LoginResponse>> refreshToken(@Valid @RequestBody RefreshTokenRequest request) {
         LoginResponse response = authService.refreshAccessToken(request);
         return ResponseEntity.ok(ApiResponse.success(response, "Token rafraîchi avec succès"));
     }
-    
-    /**
-     * Déconnecte l'utilisateur en révoquant ses refresh tokens.
-     *
-     * @param request le refresh token à révoquer
-     * @return un message de confirmation
-     */
+
     @PostMapping("/logout")
     public ResponseEntity<ApiResponse<Void>> logout() {
-        User currentUser = authService.getCurrentUser();  
+        User currentUser = currentUserService.getCurrentUser();
         authService.logout(currentUser);
         return ResponseEntity.ok(ApiResponse.success(null, "Déconnexion réussie."));
     }
 
-    /***
-     * 
-     * */
     @PostMapping("/request-password-reset")
     public ResponseEntity<ApiResponse<Void>> requestPasswordReset(@Valid @RequestBody RequestPasswordResetRequest request) {
         try {
@@ -90,5 +64,4 @@ public class AuthController {
         return ResponseEntity.ok(ApiResponse.success(null, "Mot de passe réinitialisé avec succès. Vous pouvez maintenant vous connecter."));
     }
 
-    
 }

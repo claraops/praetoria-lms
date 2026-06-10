@@ -86,11 +86,4 @@ public class CourseServiceImpl implements CourseService {
         courseRepository.deleteById(id);
     }
 
-    @Override
-    @Transactional
-    public CourseResponse toggleCompleted(Long courseId, Long userId) {
-        Course course = courseRepository.findById(courseId)
-                .orElseThrow(() -> new ResourceNotFoundException("Cours non trouvé"));
-        return CourseResponse.fromEntity(course);
-    }
 }

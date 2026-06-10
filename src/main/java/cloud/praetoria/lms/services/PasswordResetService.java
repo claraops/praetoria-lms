@@ -40,7 +40,6 @@ public class PasswordResetService {
                 return new ResourceNotFoundException("Email non trouvé");
             });
         
-        // Générer un token
         String tokenValue = UUID.randomUUID().toString();
         
         PasswordResetToken resetToken = PasswordResetToken.builder()
@@ -53,7 +52,6 @@ public class PasswordResetService {
         passwordResetTokenRepository.save(resetToken);
         log.info("Token de reset créé pour: {}", email);
         
-        // Envoyer l'email
         emailService.sendPasswordResetEmail(user, tokenValue);
     }
     
@@ -64,12 +62,10 @@ public class PasswordResetService {
     public void resetPassword(ResetPasswordRequest request) {
         log.info("Réinitialisation du mot de passe avec token");
         
-        // Vérifier que les mots de passe correspondent
         if (!request.getNewPassword().equals(request.getConfirmPassword())) {
             throw new AuthenticationException("Les mots de passe ne correspondent pas");
         }
         
-        // Chercher le token valide
         PasswordResetToken resetToken = passwordResetTokenRepository
             .findValidToken(request.getToken(), LocalDateTime.now())
             .orElseThrow(() -> {
@@ -79,23 +75,20 @@ public class PasswordResetService {
         
         User user = resetToken.getUser();
         
-        // Mettre à jour le mot de passe
         user.setPassword(passwordEncoder.encode(request.getNewPassword()));
         userRepository.save(user);
         
-        // Marquer le token comme utilisé
         resetToken.setIsUsed(true);
         passwordResetTokenRepository.save(resetToken);
         
         log.info("Mot de passe réinitialisé pour: {}", user.getEmail());
         
-        // Envoyer un email de confirmation
         emailService.sendPasswordResetConfirmationEmail(user);
     }
     
     /**
-     * Nettoyer les tokens expirés
-     * À appeler régulièrement (via un scheduled task)
+     * Nettoyer les tokens expires
+     * A appeler regulierement (via un scheduled task)
      */
     @Transactional
     public void cleanupExpiredTokens() {

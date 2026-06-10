@@ -82,6 +82,25 @@ public class OrganizationService {
     }
     
     /**
+     * Mettre a jour une organisation
+     */
+    @Transactional
+    public OrganizationDTO updateOrganization(Long id, CreateOrganizationRequest request) {
+        Organization org = organizationRepository.findById(id)
+            .orElseThrow(() -> new ResourceNotFoundException("Organisation non trouvée"));
+
+        org.setName(request.getName());
+        org.setContactEmail(request.getContactEmail());
+        org.setMaxStudents(request.getMaxStudents());
+        if (request.getLicenseExpiresAt() != null) {
+            org.setLicenseExpiresAt(request.getLicenseExpiresAt());
+        }
+        organizationRepository.save(org);
+        log.info("Organisation mise a jour: {}", org.getName());
+        return toDTO(org);
+    }
+
+    /**
      * Activer/Désactiver une organisation
      */
     @Transactional

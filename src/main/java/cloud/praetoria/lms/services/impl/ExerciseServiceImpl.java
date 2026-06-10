@@ -79,11 +79,4 @@ public class ExerciseServiceImpl implements ExerciseService {
         exerciseRepository.deleteById(id);
     }
 
-    @Override
-    @Transactional
-    public ExerciseResponse toggleCompleted(Long exerciseId, Long userId) {
-        Exercise exercise = exerciseRepository.findById(exerciseId)
-                .orElseThrow(() -> new ResourceNotFoundException("Exercice non trouvé"));
-        return ExerciseResponse.fromEntity(exercise);
-    }
 }
